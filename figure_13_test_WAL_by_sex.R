@@ -69,14 +69,16 @@ fig <- function(dat, ylab, legend_labels, facet_labels) {
 }
 
 
-m_nl <- fig_inout(fig, Tests_fig, y_nl, legend_labels_nl, facet_labels_nl)
-m_fr <- fig_inout(fig, Tests_fig, y_fr, legend_labels_fr, facet_labels_fr)
-m_en <- fig_inout(fig, Tests_fig, y_en, legend_labels_en, facet_labels_en)
+m <- list(
+  nl = fig_inout(fig, Tests_fig, y_nl, legend_labels_nl, facet_labels_nl),
+  fr = fig_inout(fig, Tests_fig, y_fr, legend_labels_fr, facet_labels_fr),
+  en = fig_inout(fig, Tests_fig, y_en, legend_labels_en, facet_labels_en)
+)
 
 
 
 # save
-ggsave_langs("m", "figure_13_tests_sex_WAL")
+ggsave_langs(m, "figure_13_tests_sex_WAL")
 
 # # Narrative --------------------------------------------------------
 # # Total tests per sex, total tests per 1000 people, % change vs 2024 and vs 2023

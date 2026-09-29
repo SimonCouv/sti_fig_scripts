@@ -94,9 +94,11 @@ return(m)
 
 
 # decide which language for the graph 
-m_nl <- fig_inout(fig, Coverage_fig, xlab_nl, ylab_nl, ylab2_nl, facet_labels_nl)
-m_fr <- fig_inout(fig, Coverage_fig, xlab_fr, ylab_fr, ylab2_fr, facet_labels_fr)
-m_en <- fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en)
+m <- list(
+  nl = fig_inout(fig, Coverage_fig, xlab_nl, ylab_nl, ylab2_nl, facet_labels_nl),
+  fr = fig_inout(fig, Coverage_fig, xlab_fr, ylab_fr, ylab2_fr, facet_labels_fr),
+  en = fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en)
+)
 
 
 
@@ -105,7 +107,7 @@ m_en <- fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en
 # sizes (cm) per version: panel size of the full figure (18 x 14 cm) kept constant
 dims <- facet_dims_inout(Coverage_fig, width = 18, height = 14)
 
-ggsave_langs("m", "figure_04_coverage_BE",
+ggsave_langs(m, "figure_04_coverage_BE",
              width = dims$width, height = dims$height)
 
 
