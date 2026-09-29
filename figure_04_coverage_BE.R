@@ -106,12 +106,8 @@ m_en <- fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en
 # sizes (cm) per version: panel size of the full figure (18 x 14 cm) kept constant
 dims <- facet_dims_inout(Coverage_fig, width = 18, height = 14)
 
-for (lang in langs){
-  print(lang)
-  m_lang <- paste0('m_', lang)
-  ggsave_figs(get(m_lang), fp = sprintf("%s/figure_04_coverage_BE_%s.png", dir_figs, lang),
-              width = dims$width, height = dims$height)
-}
+ggsave_langs("m", "figure_04_coverage_BE",
+             width = dims$width, height = dims$height)
 
 
 # # Narrative --------------------------------------------------------

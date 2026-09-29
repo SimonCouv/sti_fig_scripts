@@ -122,18 +122,10 @@ n_en <- fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_en, facet_labels_en, legend_labe
 
 
 # save Regional trends
-for (lang in langs){
-  print(lang)
-  m_lang <- paste0('m_', lang)
-  ggsave_figs(get(m_lang), fp = sprintf("%s/figure_09_diagn_trend_FL_sex_%s.png", dir_figs, lang))
-}
+ggsave_langs("m", "figure_09_diagn_trend_FL_sex")
 
 
 
 # save regional + belgian trends
-for (lang in langs){
-  print(lang)
-  n_lang <- paste0('n_', lang)
-  ggsave_figs(get(n_lang), fp = sprintf("%s/figure_09a_diagn_trend_FL_BEL_sex_%s.png", dir_figs, lang),
-              type = "cairo")
-}
+ggsave_langs("n", "figure_09a_diagn_trend_FL_BEL_sex",
+             type = "cairo")
