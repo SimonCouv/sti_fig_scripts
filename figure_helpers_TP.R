@@ -59,7 +59,8 @@ facet_dims_inout <- function(dat, width, height, margin_w = 3, margin_h = 2) {
 # p_list: list(all = , noTP = , TP = ), as returned by fig_inout()
 # fp: file path of the full figure; the other versions get the suffix added before the extension
 # width, height (cm): one value for all versions, or a vector named like suffixes
-ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = '_TP'), width = 16, height = 9){
+# ...: passed on to ggsave (e.g. type = "cairo")
+ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = '_TP'), width = 16, height = 9, ...){
 
   for (pname in names(suffixes)){
     s <- suffixes[pname]
@@ -71,6 +72,6 @@ ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = 
     )
     ggsave(p_list[[pname]], filename = fp_out,
            dpi = 300,
-           width = w, height = h, units = "cm")
+           width = w, height = h, units = "cm", ...)
   }
 }
