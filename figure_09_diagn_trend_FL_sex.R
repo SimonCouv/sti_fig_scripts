@@ -115,7 +115,7 @@ m <- list(
 
 
 # ADD BELGIAN INC ESTIMATES 
-n <- list(
+m_be <- list(
   nl = fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_nl, facet_labels_nl, legend_labels_nl),
   fr = fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_fr, facet_labels_fr, legend_labels_fr),
   en = fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_en, facet_labels_en, legend_labels_en)
@@ -129,5 +129,5 @@ ggsave_langs(m, "figure_09_diagn_trend_FL_sex")
 
 
 # save regional + belgian trends
-ggsave_langs(n, "figure_09a_diagn_trend_FL_BEL_sex",
+ggsave_langs(m_be, "figure_09a_diagn_trend_FL_BEL_sex",
              type = "cairo")
