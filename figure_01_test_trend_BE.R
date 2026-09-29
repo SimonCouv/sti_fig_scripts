@@ -4,6 +4,9 @@ rm(list = ls())
 #LOAD DATA , STI THEME GGPLOT, specify years (until when - test/diagnoses), define Y-limits
 source("prep_figure.R")
 
+# helpers for the versions with/without syphilis (fig_inout, ggsave_figs, SSC_STI)
+source("figure_helpers_TP.R")
+
 
 # tests for Belgium as a whole 
 
@@ -29,9 +32,6 @@ ylab_en <- "Number of reimbursed tests \n per 1000 inh. in Belgium"
 legend_labels_nl <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorroe", TREPAL = "Syfilis")
 legend_labels_fr <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhée", TREPAL = "Syphilis")
 legend_labels_en <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhoea", TREPAL = "Syphilis")
-
-SSC_STI <- SSC[1:3]
-names(SSC_STI) <- names(legend_labels_nl)
 
 y_max <- y_max_test
 
@@ -71,40 +71,13 @@ fig <- function(dat, ylab, legend_labels) {
   return(m)
 }
 
-fig_inout <- function(dat, ylab, legend_labels){
-  
-  # #assumes syphilis is element 3
-  # stopifnot(legend_labels[3] %in% c('Syfilis', 'Syphilis'))
-  # legend_labels_nl_noTP <- legend_labels[!legend_labels %in%]
-  
-  m <- fig(dat, ylab, legend_labels)
-  m_noTP <- fig(filter(dat, Germ != 'TREPAL'), ylab, legend_labels)
-  m_TP <- fig(filter(dat, Germ == 'TREPAL'), ylab, legend_labels)
-  
-  return(list(all = m, noTP = m_noTP, TP = m_TP))
-}
-
 # decide which language for the graph 
-m_nl <- fig_inout(Tests_fig, ylab_nl, legend_labels_nl)
-m_fr <- fig_inout(Tests_fig, ylab_fr, legend_labels_fr)
-m_en <- fig_inout(Tests_fig, ylab_en, legend_labels_en)
+m_nl <- fig_inout(fig, Tests_fig, ylab_nl, legend_labels_nl)
+m_fr <- fig_inout(fig, Tests_fig, ylab_fr, legend_labels_fr)
+m_en <- fig_inout(fig, Tests_fig, ylab_en, legend_labels_en)
 
 # save
 dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
-
-ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = '_TP'), width = 16, height = 9){
-  
-  for (pname in names(suffixes)){
-    s <- suffixes[pname]
-    fp_out <- fs::path_ext_set(
-      paste0(fs::path_ext_remove(fp), s),
-      path_ext(fp)
-    )
-    ggsave(p_list[[pname]], filename = fp_out,
-           dpi = 300, 
-           width = width, height = height, units = "cm")
-  }
-}
 
 langs <- c('nl', 'fr', 'en')
 for (lang in langs){
