@@ -4,14 +4,17 @@ rm(list = ls())
 #LOAD DATA , STI THEME GGPLOT, specify years (until when - test/diagnoses), define Y-limits
 source("prep_figure.R")
 
+# helpers for the versions with/without syphilis (fig_inout, ggsave_figs, SSC_STI)
+source("figure_helpers_TP.R")
+
 
 y_nl <- "Geschatte aantal diagnoses \n per 100 000 inw. in België"
 y_fr <- "Nombre estimé de diagnostics \n par 100 000 hab en Belgique"
 y_en <- "Estimated number of diagnoses \n per 100,000 inh in Belgium"
 
-legend_labels_nl <- c("Chlamydia", "Gonorroe", "Syfilis")
-legend_labels_fr <- c("Chlamydia", "Gonorrhée", "Syphilis")
-legend_labels_en <- c("Chlamydia", "Gonorrhoea", "Syphilis")
+legend_labels_nl <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorroe", TREPAL = "Syfilis")
+legend_labels_fr <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhée", TREPAL = "Syphilis")
+legend_labels_en <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhoea", TREPAL = "Syphilis")
 
 y_max <- y_max_diag
 
@@ -29,9 +32,9 @@ if (max_inc > y_max) {
   ))
 }
 
-fig <- function(ylab, legend_labels) {
+fig <- function(dat, ylab, legend_labels) {
   
-  m <- ggplot(AdjInc_fig, aes(Year, Inc_est, color = Germ)) +
+  m <- ggplot(dat, aes(Year, Inc_est, color = Germ)) +
     geom_line(lwd = 1) +
     labs(x = "", y = ylab) +
     ylim(0,y_max)+
@@ -39,7 +42,7 @@ fig <- function(ylab, legend_labels) {
     scale_x_continuous(breaks = seq(start, year_of_interest_diagn, 1)) + #start = as defined in EpilaboSTI.R
     scale_color_manual(
       name = NULL,
-      values = SSC,
+      values = SSC_STI,
       labels = legend_labels
     )+
     sti_theme() +
@@ -51,25 +54,20 @@ fig <- function(ylab, legend_labels) {
 
 
 # decide which language for the graph 
-m_nl <- fig(y_nl, legend_labels_nl)
-m_fr <- fig(y_fr, legend_labels_fr)
-m_en <- fig(y_en, legend_labels_en)
+m_nl <- fig_inout(fig, AdjInc_fig, y_nl, legend_labels_nl)
+m_fr <- fig_inout(fig, AdjInc_fig, y_fr, legend_labels_fr)
+m_en <- fig_inout(fig, AdjInc_fig, y_en, legend_labels_en)
 
 
 # save
-foldr <- paste0(dirname(getwd()),"/results_figures_report/")
+dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
 
-ggsave(m_nl, filename = paste0(foldr,"figure_05_diagn_trend_BE_nl.png"), 
-       dpi = 300, 
-       width = 16, height = 9, units = "cm")
-
-ggsave(m_fr, filename = paste0(foldr,"figure_05_diagn_trend_BE_fr.png"), 
-       dpi = 300, 
-       width = 16, height = 9, units = "cm")
-
-ggsave(m_en, filename = paste0(foldr,"figure_05_diagn_trend_BE_en.png"), 
-       dpi = 300, 
-       width = 16, height = 9, units = "cm")
+langs <- c('nl', 'fr', 'en')
+for (lang in langs){
+  print(lang)
+  m_lang <- paste0('m_', lang)
+  ggsave_figs(get(m_lang), fp = sprintf("%s/figure_05_diagn_trend_BE_%s.png", dir_figs, lang))
+}
 
 
 

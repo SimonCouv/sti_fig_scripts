@@ -4,6 +4,9 @@ rm(list = ls())
 #LOAD DATA , STI THEME GGPLOT, specify years (until when - test/diagnoses), define Y-limits
 source("prep_figure.R")
 
+# helpers for the versions with/without syphilis (fig_inout, ggsave_figs, SSC_STI)
+source("figure_helpers_TP.R")
+
 
 Tests_fig <- Coverage %>%
   dplyr::filter( Gender != "All" & Region == "BEL" & Year <= year_of_interest_test)%>%
@@ -22,9 +25,9 @@ ylab_nl <- "Aantal terugbetaalde tests \n per 1000 inw. in België"
 ylab_fr <- "Nombre de tests remboursés \n par 1000 hab. en Belgique"
 ylab_en <- "Number of reimbursed tests \n per 1000 inh. in Belgium"
 
-legend_labels_nl <- c("Chlamydia", "Gonorroe", "Syfilis")
-legend_labels_fr <- c("Chlamydia", "Gonorrhée", "Syphilis")
-legend_labels_en <- c("Chlamydia", "Gonorrhoea", "Syphilis")
+legend_labels_nl <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorroe", TREPAL = "Syfilis")
+legend_labels_fr <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhée", TREPAL = "Syphilis")
+legend_labels_en <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhoea", TREPAL = "Syphilis")
 
 facet_labels_nl <- labeller(Gender = c( "F" = "Vrouwen", "M" = "Mannen") )
 facet_labels_fr <- labeller(Gender = c( "F" = "Femmes", "M" = "Hommes") )
@@ -41,9 +44,9 @@ if (max_test > y_max) {
   ))
 }
 
-fig <- function(ylab, facet_labels, legend_labels) {
+fig <- function(dat, ylab, facet_labels, legend_labels) {
   
-  m <- ggplot(Tests_fig, aes(Year, test_pop, color = Germ)) +
+  m <- ggplot(dat, aes(Year, test_pop, color = Germ)) +
     facet_wrap(~ Gender,labeller = facet_labels)+
     geom_line(lwd = 1, linetype = "longdash") +
     labs(x = "", y = ylab) +
@@ -56,7 +59,7 @@ fig <- function(ylab, facet_labels, legend_labels) {
     ylim(0,y_max)+
     scale_color_manual(
       name = NULL,
-      values = SSC,
+      values = SSC_STI,
       labels = legend_labels
     )+
     sti_theme() +
@@ -70,26 +73,21 @@ fig <- function(ylab, facet_labels, legend_labels) {
 
 
 # decide which language for the graph 
-m_nl <- fig(ylab_nl, facet_labels_nl, legend_labels_nl) 
-m_fr <- fig(ylab_fr, facet_labels_fr, legend_labels_fr) 
-m_en <- fig(ylab_en, facet_labels_en, legend_labels_en) 
+m_nl <- fig_inout(fig, Tests_fig, ylab_nl, facet_labels_nl, legend_labels_nl)
+m_fr <- fig_inout(fig, Tests_fig, ylab_fr, facet_labels_fr, legend_labels_fr)
+m_en <- fig_inout(fig, Tests_fig, ylab_en, facet_labels_en, legend_labels_en)
 
 
 
 # save
-foldr <- paste0(dirname(getwd()),"/results_figures_report/")
-ggsave(m_nl, filename = paste0(foldr,"figure_02_test_trend_sex_nl.png"), 
-       dpi = 300, 
-       width = 16, height = 9, units = "cm")
+dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
 
-ggsave(m_fr, filename = paste0(foldr,"figure_02_test_trend_sex_fr.png"), 
-       dpi = 300, 
-       width = 16, height = 9, units = "cm")
-
-
-ggsave(m_en, filename = paste0(foldr,"figure_02_test_trend_sex_en.png"), 
-       dpi = 300, 
-       width = 16, height = 9, units = "cm")
+langs <- c('nl', 'fr', 'en')
+for (lang in langs){
+  print(lang)
+  m_lang <- paste0('m_', lang)
+  ggsave_figs(get(m_lang), fp = sprintf("%s/figure_02_test_trend_sex_%s.png", dir_figs, lang))
+}
 
 # 
 # 1# narrative ---------------------------------------------------------------
