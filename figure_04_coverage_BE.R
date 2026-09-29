@@ -3,7 +3,7 @@ rm(list = ls())
 #LOAD DATA , STI THEME GGPLOT, specify years (until when - test/diagnoses), define Y-limits
 source("prep_figure.R")
 
-# helpers for the versions with/without syphilis (fig_inout, ggsave_figs, facet_layout_germ, facet_dims_inout)
+# helpers for the versions with/without syphilis (dir_figs, langs, fig_inout, ggsave_figs, facet_layout_germ, facet_dims_inout)
 source("figure_helpers_TP.R")
 
 
@@ -94,26 +94,21 @@ return(m)
 
 
 # decide which language for the graph 
-m_nl <- fig_inout(fig, Coverage_fig, xlab_nl, ylab_nl, ylab2_nl, facet_labels_nl)
-m_fr <- fig_inout(fig, Coverage_fig, xlab_fr, ylab_fr, ylab2_fr, facet_labels_fr)
-m_en <- fig_inout(fig, Coverage_fig, xlab_nl, ylab_en, ylab2_en, facet_labels_en)
+m <- list(
+  nl = fig_inout(fig, Coverage_fig, xlab_nl, ylab_nl, ylab2_nl, facet_labels_nl),
+  fr = fig_inout(fig, Coverage_fig, xlab_fr, ylab_fr, ylab2_fr, facet_labels_fr),
+  en = fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en)
+)
 
 
 
 
 # save
-dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
-
 # sizes (cm) per version: panel size of the full figure (18 x 14 cm) kept constant
 dims <- facet_dims_inout(Coverage_fig, width = 18, height = 14)
 
-langs <- c('nl', 'fr', 'en')
-for (lang in langs){
-  print(lang)
-  m_lang <- paste0('m_', lang)
-  ggsave_figs(get(m_lang), fp = sprintf("%s/figure_04_coverage_BE_%s.png", dir_figs, lang),
-              width = dims$width, height = dims$height)
-}
+ggsave_langs(m, "figure_04_coverage_BE",
+             width = dims$width, height = dims$height)
 
 
 # # Narrative --------------------------------------------------------

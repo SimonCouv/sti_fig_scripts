@@ -4,7 +4,7 @@ rm(list = ls())
 #LOAD DATA , STI THEME GGPLOT, specify years (until when - test/diagnoses), define Y-limits
 source("prep_figure.R")
 
-# helpers for the versions with/without syphilis (fig_inout, ggsave_figs, SSC_STI)
+# helpers for the versions with/without syphilis (dir_figs, langs, fig_inout, ggsave_figs, SSC_STI)
 source("figure_helpers_TP.R")
 
 # tests for Flanders by sex 
@@ -77,21 +77,16 @@ fig <- function(dat, ylab, legend_labels, facet_labels) {
 }
 
 
-m_nl <- fig_inout(fig, Tests_fig, y_nl, legend_labels_nl, facet_labels_nl)
-m_fr <- fig_inout(fig, Tests_fig, y_fr, legend_labels_fr, facet_labels_fr)
-m_en <- fig_inout(fig, Tests_fig, y_en, legend_labels_en, facet_labels_en)
+m <- list(
+  nl = fig_inout(fig, Tests_fig, y_nl, legend_labels_nl, facet_labels_nl),
+  fr = fig_inout(fig, Tests_fig, y_fr, legend_labels_fr, facet_labels_fr),
+  en = fig_inout(fig, Tests_fig, y_en, legend_labels_en, facet_labels_en)
+)
 
 
 
 # save
-dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
-
-langs <- c('nl', 'fr', 'en')
-for (lang in langs){
-  print(lang)
-  m_lang <- paste0('m_', lang)
-  ggsave_figs(get(m_lang), fp = sprintf("%s/figure_07_tests_sex_FL_%s.png", dir_figs, lang))
-}
+ggsave_langs(m, "figure_07_tests_sex_FL")
 
 
 # 1# narrative ---------------------------------------------------------------

@@ -6,6 +6,11 @@
 # Source right after source("prep_figure.R"): uses SSC, defined there.
 
 
+# output folder and languages, the same for all figure scripts
+dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
+langs <- c('nl', 'fr', 'en')
+
+
 # germ colours, named by germ so a germ keeps its colour when others are filtered out
 SSC_STI <- setNames(SSC[1:3], c("CHLTRA", "NEIGON", "TREPAL"))
 
@@ -73,5 +78,20 @@ ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = 
     ggsave(p_list[[pname]], filename = fp_out,
            dpi = 300,
            width = w, height = h, units = "cm", ...)
+  }
+}
+
+
+# save the three versions of a figure, for every language in langs
+# p_by_lang: list of fig_inout() results named by language, e.g. list(nl = , fr = , en = )
+# fname: file name of the full figure without "_<lang>.png", e.g. "figure_01_test_trend_BE";
+#        saved in dir_figs as <fname>_<lang>.png, <fname>_<lang>_noTP.png, <fname>_<lang>_TP.png
+# ...: passed on to ggsave_figs (width, height, type, ...)
+ggsave_langs <- function(p_by_lang, fname, ...){
+  
+  stopifnot(setequal(names(p_by_lang), langs))
+  for (lang in langs){
+    print(lang)
+    ggsave_figs(p_by_lang[[lang]], fp = fs::path(dir_figs, sprintf("%s_%s.png", fname, lang)), ...)
   }
 }

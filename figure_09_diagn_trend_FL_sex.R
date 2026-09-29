@@ -4,7 +4,7 @@ rm(list = ls())
 #LOAD DATA , STI THEME GGPLOT, specify years (until when - test/diagnoses), define Y-limits
 source("prep_figure.R")
 
-# helpers for the versions with/without syphilis (fig_inout, ggsave_figs, SSC_STI)
+# helpers for the versions with/without syphilis (dir_figs, langs, fig_inout, ggsave_figs, SSC_STI)
 source("figure_helpers_TP.R")
 
 y_nl <- "Geschatte aantal diagnoses \n per 100 000 inw. in Vlaanderen\n"
@@ -107,34 +107,27 @@ fig_FL_BEL_sex <- function(dat, ylab, facet_labels, legend_labels) {
 
 # define which language for the graph 
 #NL
-m_nl <- fig_inout(fig, Adj_Reg_FL, y_nl, facet_labels_nl, legend_labels_nl)
-m_fr <- fig_inout(fig, Adj_Reg_FL, y_fr, facet_labels_fr, legend_labels_fr)
-m_en <- fig_inout(fig, Adj_Reg_FL, y_en, facet_labels_en, legend_labels_en)
+m <- list(
+  nl = fig_inout(fig, Adj_Reg_FL, y_nl, facet_labels_nl, legend_labels_nl),
+  fr = fig_inout(fig, Adj_Reg_FL, y_fr, facet_labels_fr, legend_labels_fr),
+  en = fig_inout(fig, Adj_Reg_FL, y_en, facet_labels_en, legend_labels_en)
+)
 
 
 # ADD BELGIAN INC ESTIMATES 
-n_nl <- fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_nl, facet_labels_nl, legend_labels_nl)
-n_fr <- fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_fr, facet_labels_fr, legend_labels_fr)
-n_en <- fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_en, facet_labels_en, legend_labels_en)
+m_be <- list(
+  nl = fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_nl, facet_labels_nl, legend_labels_nl),
+  fr = fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_fr, facet_labels_fr, legend_labels_fr),
+  en = fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_en, facet_labels_en, legend_labels_en)
+)
 
 
 
 # save Regional trends
-dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
-
-langs <- c('nl', 'fr', 'en')
-for (lang in langs){
-  print(lang)
-  m_lang <- paste0('m_', lang)
-  ggsave_figs(get(m_lang), fp = sprintf("%s/figure_09_diagn_trend_FL_sex_%s.png", dir_figs, lang))
-}
+ggsave_langs(m, "figure_09_diagn_trend_FL_sex")
 
 
 
 # save regional + belgian trends
-for (lang in langs){
-  print(lang)
-  n_lang <- paste0('n_', lang)
-  ggsave_figs(get(n_lang), fp = sprintf("%s/figure_09a_diagn_trend_FL_BEL_sex_%s.png", dir_figs, lang),
-              type = "cairo")
-}
+ggsave_langs(m_be, "figure_09a_diagn_trend_FL_BEL_sex",
+             type = "cairo")
