@@ -27,9 +27,14 @@ Adj_Reg_FL <- AdjInc %>%
 
 
 
-#CHECK if preset y-limits are ok
+# Belgium per sex, all age groups (added as dotted lines in figure 09a)
+Adj_BEL_sex <- AdjInc %>%
+  filter(Gender != "All" & Region == "BEL" & Age == "All")
+
+
+#CHECK if preset y-limits are ok (Flemish and Belgian estimates)
 y_max <- y_max_diag
-max_inc <- max(Adj_Reg_FL$Inc_est, na.rm = TRUE)
+max_inc <- max(c(Adj_Reg_FL$Inc_est, Adj_BEL_sex$Inc_est), na.rm = TRUE)
 
 if (max_inc > y_max) {
   stop(sprintf(
@@ -65,39 +70,39 @@ fig <- function(dat, ylab, facet_labels, legend_labels) {
 }
 
 
-# fig_FL_BEL_sex <- function(ylab, facet_labels, legend_labels) {
-#   
-#   n <- ggplot(Adj_Reg_FL, aes(Year, Inc_est, color = Germ)) +
-#     facet_wrap( ~ Gender,labeller = facet_labels)+
-#     geom_line(lwd = 1) +
-#     labs(x = "", y = ylab) +
-#     scale_x_continuous(breaks = seq(2016, year_of_interest, 1)) +
-#     scale_y_continuous(
-#       breaks = seq(0, 500, 100),
-#       limits = c(0, 505)
-#     )+
-#     scale_color_manual(
-#       name = NULL,
-#       values = SSC,
-#       labels = legend_labels
-#     )+
-#     
-#     ### add belgian Inc estimates
-#         geom_line(
-#           data = subset(AdjInc, Region == "BEL" & Gender != "All" & Age == "All"),
-#           aes(x = Year, y = Inc_est, color = Germ),
-#           linewidth = 0.8,
-#           linetype = "dotted",
-#           inherit.aes = FALSE
-#         )+
-#     ###
-# 
-#     sti_theme() +
-#     theme(
-#       axis.text.x = element_text( hjust = 1, vjust = 0.5 ,angle = 45)
-#     )
-#   return(n)
-# }
+fig_FL_BEL_sex <- function(dat, ylab, facet_labels, legend_labels) {
+  
+  n <- ggplot(dat, aes(Year, Inc_est, color = Germ)) +
+    facet_wrap( ~ Gender,labeller = facet_labels)+
+    geom_line(lwd = 1) +
+    labs(x = "", y = ylab) +
+    scale_x_continuous(breaks = seq(2016, year_of_interest_diagn, 1)) +
+    scale_y_continuous(
+      breaks = seq(0, 500, 100),
+      limits = c(0, y_max)
+    )+
+    scale_color_manual(
+      name = NULL,
+      values = SSC_STI,
+      labels = legend_labels
+    )+
+    
+    ### add belgian Inc estimates (same germs as in dat)
+        geom_line(
+          data = filter(Adj_BEL_sex, Germ %in% unique(dat$Germ)),
+          aes(x = Year, y = Inc_est, color = Germ),
+          linewidth = 0.8,
+          linetype = "dotted",
+          inherit.aes = FALSE
+        )+
+    ###
+
+    sti_theme() +
+    theme(
+      axis.text.x = element_text( hjust = 1, vjust = 0.5 ,angle = 45)
+    )
+  return(n)
+}
 
 
 # define which language for the graph 
@@ -108,9 +113,9 @@ m_en <- fig_inout(fig, Adj_Reg_FL, y_en, facet_labels_en, legend_labels_en)
 
 
 # ADD BELGIAN INC ESTIMATES 
-# n_nl <- fig_FL_BEL_sex(y_nl, facet_labels_nl, legend_labels_nl)
-# n_fr <- fig_FL_BEL_sex(y_fr, facet_labels_fr, legend_labels_fr)
-# n_en <- fig_FL_BEL_sex(y_en, facet_labels_en, legend_labels_en)
+n_nl <- fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_nl, facet_labels_nl, legend_labels_nl)
+n_fr <- fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_fr, facet_labels_fr, legend_labels_fr)
+n_en <- fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_en, facet_labels_en, legend_labels_en)
 
 
 
@@ -127,15 +132,9 @@ for (lang in langs){
 
 
 # save regional + belgian trends
-# ggsave(n_nl, filename = paste0(foldr,"figure_09a_diagn_trend_FL_BEL_sex_nl.png"), 
-#        dpi = 300, type = "cairo",
-#        width = 16, height = 9, units = "cm")
-# 
-# ggsave(n_fr, filename = paste0(foldr,"figure_09a_diagn_trend_FL_BEL_sex_fr.png"), 
-#        dpi = 300, type = "cairo",
-#        width = 16, height = 9, units = "cm")
-# 
-# ggsave(n_en, filename = paste0(foldr,"figure_09a_diagn_trend_FL_BEL_sex_en.png"), 
-#        dpi = 300, type = "cairo",
-#        width = 16, height = 9, units = "cm")
-
+for (lang in langs){
+  print(lang)
+  n_lang <- paste0('n_', lang)
+  ggsave_figs(get(n_lang), fp = sprintf("%s/figure_09a_diagn_trend_FL_BEL_sex_%s.png", dir_figs, lang),
+              type = "cairo")
+}
