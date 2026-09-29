@@ -3,7 +3,7 @@ rm(list = ls())
 #LOAD DATA , STI THEME GGPLOT, specify years (until when - test/diagnoses), define Y-limits
 source("prep_figure.R")
 
-# helpers for the versions with/without syphilis (fig_inout, ggsave_figs, facet_layout_germ, facet_dims_inout)
+# helpers for the versions with/without syphilis (dir_figs, langs, fig_inout, ggsave_figs, facet_layout_germ, facet_dims_inout)
 source("figure_helpers_TP.R")
 
 facet_labels_nl <- labeller(Gender = c(#"All" = "Beide geslachten", 
@@ -117,12 +117,9 @@ m_en <- fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en
 # m_en 
 
 # save
-dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
-
 # sizes (cm) per version: panel size of the full figure (16 x 9 cm) kept constant
 dims <- facet_dims_inout(Coverage_fig, width = 16, height = 9)
 
-langs <- c('nl', 'fr', 'en')
 for (lang in langs){
   print(lang)
   m_lang <- paste0('m_', lang)

@@ -4,7 +4,7 @@ rm(list = ls())
 #LOAD DATA , STI THEME GGPLOT, specify years (until when - test/diagnoses), define Y-limits
 source("prep_figure.R")
 
-# helpers for the versions with/without syphilis (fig_inout, ggsave_figs, SSC_STI)
+# helpers for the versions with/without syphilis (dir_figs, langs, fig_inout, ggsave_figs, SSC_STI)
 source("figure_helpers_TP.R")
 
 y_nl <- "Geschatte aantal diagnoses \n per 100 000 inw. in Vlaanderen\n"
@@ -120,9 +120,6 @@ n_en <- fig_inout(fig_FL_BEL_sex, Adj_Reg_FL, y_en, facet_labels_en, legend_labe
 
 
 # save Regional trends
-dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
-
-langs <- c('nl', 'fr', 'en')
 for (lang in langs){
   print(lang)
   m_lang <- paste0('m_', lang)

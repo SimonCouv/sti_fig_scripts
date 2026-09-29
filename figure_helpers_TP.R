@@ -6,6 +6,11 @@
 # Source right after source("prep_figure.R"): uses SSC, defined there.
 
 
+# output folder and languages, the same for all figure scripts
+dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
+langs <- c('nl', 'fr', 'en')
+
+
 # germ colours, named by germ so a germ keeps its colour when others are filtered out
 SSC_STI <- setNames(SSC[1:3], c("CHLTRA", "NEIGON", "TREPAL"))
 
