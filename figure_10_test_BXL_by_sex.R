@@ -1,4 +1,5 @@
 # Figure: test trends in Brussels
+rm(list = ls())
 
 #LOAD DATA , STI THEME GGPLOT, specify years (until when - test/diagnoses), define Y-limits
 source("prep_figure.R")

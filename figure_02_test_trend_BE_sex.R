@@ -40,7 +40,7 @@ max_test <- max(Tests_fig$test_pop, na.rm = TRUE)
 if (max_test > y_max) {
   stop(sprintf(
     "Maximum inc estimate exceeds upper limit of y-axis. adjust limit in prep_figure.R.",
-    max_inc, y_max
+    max_test, y_max
   ))
 }
 
