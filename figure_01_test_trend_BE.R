@@ -92,7 +92,7 @@ m_en <- fig_inout(Tests_fig, ylab_en, legend_labels_en)
 # save
 dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
 
-ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = 'TP'), width = 16, height = 9){
+ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = '_TP'), width = 16, height = 9){
   
   for (pname in names(suffixes)){
     s <- suffixes[pname]
