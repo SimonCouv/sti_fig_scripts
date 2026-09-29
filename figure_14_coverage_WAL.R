@@ -99,7 +99,8 @@ fig <- function(dat, xlab, ylab, ylab2, facet_labels) {
       axis.title.y.right = element_text(color = sc2),
       axis.ticks.y.right = element_line(color = sc2),
       axis.text.y.right = element_text(color = sc2)
-    )
+    ) +
+      theme_ytitle_wrap(colour = sc1)
   return(m)
 }
 

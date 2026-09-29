@@ -65,7 +65,8 @@ fig <- function(dat, ylab, facet_labels, legend_labels) {
     sti_theme() +
     theme(
       axis.text.x = element_text( hjust = 1, vjust = 0.5 ,angle = 45)
-    )
+    ) +
+      theme_ytitle_wrap()
   return(m)
 }
 
@@ -100,7 +101,8 @@ fig_FL_BEL_sex <- function(dat, ylab, facet_labels, legend_labels) {
     sti_theme() +
     theme(
       axis.text.x = element_text( hjust = 1, vjust = 0.5 ,angle = 45)
-    )
+    ) +
+      theme_ytitle_wrap()
   return(n)
 }
 

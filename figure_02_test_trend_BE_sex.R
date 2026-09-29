@@ -66,7 +66,8 @@ fig <- function(dat, ylab, facet_labels, legend_labels) {
     theme(
       axis.text.x = element_text( angle = 45, hjust = 1, vjust = 0.5), 
       legend.text = element_text( size =9)
-    )
+    ) +
+      theme_ytitle_wrap()
   return(m)
 }
 

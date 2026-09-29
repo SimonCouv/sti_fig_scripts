@@ -72,7 +72,8 @@ fig <- function(dat, ylab, legend_labels, facet_labels) {
    legend.text = element_text(family = 'TrebuchetMS', size = 9, face = 'plain'),
 
     axis.text.x = element_text( angle = 45, hjust = 1, vjust = 0.5)
-  )
+  ) +
+    theme_ytitle_wrap()
   return(m)
 }
 

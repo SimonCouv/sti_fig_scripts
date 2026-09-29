@@ -80,3 +80,18 @@ ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = 
            width = w, height = h, units = "cm", ...)
   }
 }
+
+
+# y-axis title that wraps automatically to the height of the panel area, so it doesn't
+# overflow in low (single-row) figures. Existing line breaks (\n) in the title are ignored.
+# Needs the ggtext package. Add after sti_theme() and theme(...), e.g.  + theme_ytitle_wrap()
+# ...: passed on to ggtext::element_textbox_simple (e.g. colour = sc1)
+theme_ytitle_wrap <- function(...) {
+  theme(
+    axis.title.y = ggtext::element_textbox_simple(
+      orientation = "left-rotated",
+      halign = 0.5,
+      ...
+    )
+  )
+}

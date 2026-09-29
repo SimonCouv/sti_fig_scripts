@@ -59,7 +59,8 @@ fig_BXL <- function(dat, ylab, facet_labels, legend_labels) {
     sti_theme() +
     theme(
       axis.text.x = element_text( hjust = 1, vjust = 0.5 ,angle = 45)
-    )
+    ) +
+      theme_ytitle_wrap()
   return(m)
 }
 
