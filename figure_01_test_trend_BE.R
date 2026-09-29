@@ -27,8 +27,8 @@ ylab_en <- "Number of reimbursed tests \n per 1000 inh. in Belgium"
 
 
 legend_labels_nl <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorroe", TREPAL = "Syfilis")
-legend_labels_fr <- c("Chlamydia", "Gonorrhée", "Syphilis")
-legend_labels_en <- c("Chlamydia", "Gonorrhoea", "Syphilis")
+legend_labels_fr <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhée", TREPAL = "Syphilis")
+legend_labels_en <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhoea", TREPAL = "Syphilis")
 
 SSC_STI <- SSC[1:3]
 names(SSC_STI) <- names(legend_labels_nl)
@@ -40,7 +40,7 @@ y_max <- y_max_test
     if (max_test > y_max) {
       stop(sprintf(
         "Maximum inc estimate exceeds upper limit of y-axis. adjust limit in prep_figure.R.",
-        max_inc, y_max
+        max_test, y_max
       ))
     }
 
@@ -77,9 +77,9 @@ fig_inout <- function(dat, ylab, legend_labels){
   # stopifnot(legend_labels[3] %in% c('Syfilis', 'Syphilis'))
   # legend_labels_nl_noTP <- legend_labels[!legend_labels %in%]
   
-  m <- fig(Tests_fig, ylab, legend_labels)
-  m_noTP <- fig(filter(Tests_fig, Germ != 'TREPAL'), ylab, legend_labels)
-  m_TP <- fig(filter(Tests_fig, Germ == 'TREPAL'), ylab, legend_labels)
+  m <- fig(dat, ylab, legend_labels)
+  m_noTP <- fig(filter(dat, Germ != 'TREPAL'), ylab, legend_labels)
+  m_TP <- fig(filter(dat, Germ == 'TREPAL'), ylab, legend_labels)
   
   return(list(all = m, noTP = m_noTP, TP = m_TP))
 }
@@ -92,7 +92,7 @@ m_en <- fig_inout(Tests_fig, ylab_en, legend_labels_en)
 # save
 dir_figs <- paste0(dirname(getwd()),"/results_figures_report/")
 
-ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP'), TP = 'TP', width = 16, height = 9){
+ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = 'TP'), width = 16, height = 9){
   
   for (pname in names(suffixes)){
     s <- suffixes[pname]
