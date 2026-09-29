@@ -109,7 +109,7 @@ fig <- function(dat, xlab, ylab, ylab2, facet_labels) {
 # decide which language for the graph 
 m_nl <- fig_inout(fig, Coverage_fig, xlab_nl, ylab_nl, ylab2_nl, facet_labels_nl)
 m_fr <- fig_inout(fig, Coverage_fig, xlab_fr, ylab_fr, ylab2_fr, facet_labels_fr)
-m_en <- fig_inout(fig, Coverage_fig, xlab_nl, ylab_en, ylab2_en, facet_labels_en)
+m_en <- fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en)
 
 # #plot
 # m_nl

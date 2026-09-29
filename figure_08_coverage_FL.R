@@ -34,7 +34,7 @@ xlab_en = "Year"
 
 ylab_nl = "Aantal terugbetaalde tests\n per 1000 inw. in Vlaanderen"
 ylab_fr = "Nombre de tests remboursés\n pour 1 000 habitants en Flandre"
-ylab_en ="Number of reimbursed tests\n per 1,000 inhabitants in Flandres"
+ylab_en ="Number of reimbursed tests\n per 1,000 inhabitants in Flanders"
 
 ylab2_nl = "Dekkingsgraden"
 ylab2_fr = "Couvertures"
@@ -109,7 +109,7 @@ return(m)
 # decide which language for the graph 
 m_nl <- fig_inout(fig, Coverage_fig, xlab_nl, ylab_nl, ylab2_nl, facet_labels_nl)
 m_fr <- fig_inout(fig, Coverage_fig, xlab_fr, ylab_fr, ylab2_fr, facet_labels_fr)
-m_en <- fig_inout(fig, Coverage_fig, xlab_nl, ylab_en, ylab2_en, facet_labels_en)
+m_en <- fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en)
 
 #plot
 # m_nl 
