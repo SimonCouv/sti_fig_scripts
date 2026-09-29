@@ -82,11 +82,7 @@ m_en <- fig_inout(fig, Tests_fig, y_en, legend_labels_en, facet_labels_en)
 
 
 # save
-for (lang in langs){
-  print(lang)
-  m_lang <- paste0('m_', lang)
-  ggsave_figs(get(m_lang), fp = sprintf("%s/figure_10_tests_sex_BXL_%s.png", dir_figs, lang))
-}
+ggsave_langs("m", "figure_10_tests_sex_BXL")
 
 # # Narrative --------------------------------------------------------
 # # Total tests per sex, total tests per 1000 people, % change vs 2024 and vs 2023

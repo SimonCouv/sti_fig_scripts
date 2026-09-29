@@ -77,9 +77,5 @@ m_en <- fig_inout(fig_BXL, Adj_Reg_BXL, y_en, facet_labels_en, legend_labels_en)
 
 
 # save
-for (lang in langs){
-  print(lang)
-  m_lang <- paste0('m_', lang)
-  ggsave_figs(get(m_lang), fp = sprintf("%s/figure_12_diagn_trend_BXL_sex_%s.png", dir_figs, lang))
-}
+ggsave_langs("m", "figure_12_diagn_trend_BXL_sex")
 
