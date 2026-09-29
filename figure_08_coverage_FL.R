@@ -51,16 +51,13 @@ Coverage_fig <- Coverage %>%
 
 scale_factor <- max(Coverage_fig$NTests_all, na.rm = TRUE ) / max(Coverage_fig$coverage , na.rm = TRUE )
 
-# sizes (cm) per version: panel size of the full figure (16 x 9 cm) kept constant
-dims <- facet_dims_inout(Coverage_fig, width = 16, height = 9)
-
 
 fig <- function(dat, xlab, ylab, ylab2, facet_labels) {
 
 # one column per germ, one row per sex; syphilis only: one row
 lay <- facet_layout_germ(dat)
-# y-axis title: re-wrapped if it is longer than the panel area is high
-ylab <- wrap_axis_title(ylab, n_chars_fit(lay[["nrow"]] * dims$panel_h))
+# y-axis title is a text box (theme_ytitle_wrap): keep the manual line breaks
+ylab <- gsub("\n", "<br>", ylab, fixed = TRUE)
 
 m <- dat %>%
   ggplot(aes(x = Year)) +
@@ -106,7 +103,8 @@ m <- dat %>%
     axis.title.y.right = element_text(color = sc2),
     axis.ticks.y.right = element_line(color = sc2),
     axis.text.y.right = element_text(color = sc2)
-  )
+  ) +
+    theme_ytitle_wrap(colour = sc1)
 return(m)
 } 
 
@@ -124,6 +122,9 @@ m <- list(
 # m$en$all
 
 # save
+# sizes (cm) per version: panel size of the full figure (16 x 9 cm) kept constant
+dims <- facet_dims_inout(Coverage_fig, width = 16, height = 9)
+
 ggsave_langs(m, "figure_08_coverage_FL",
              width = dims$width, height = dims$height)
 

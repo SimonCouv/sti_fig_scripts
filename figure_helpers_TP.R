@@ -49,16 +49,13 @@ facet_layout_germ <- function(dat) {
 # figure sizes (cm) for the three versions of a figure faceted with facet_layout_germ(),
 # keeping the panel size of the full figure (width x height) constant.
 # margin_w, margin_h: space (cm) taken by axis titles, axis labels and legend, i.e. not by panels
-# returns width and height per version, and the size of one panel (panel_w, panel_h)
 facet_dims_inout <- function(dat, width, height, margin_w = 3, margin_h = 2) {
   lay <- lapply(split_inout(dat), facet_layout_germ)
   panel_w <- (width  - margin_w) / lay$all[["ncol"]]
   panel_h <- (height - margin_h) / lay$all[["nrow"]]
   list(
     width  = sapply(lay, function(l) margin_w + l[["ncol"]] * panel_w),
-    height = sapply(lay, function(l) margin_h + l[["nrow"]] * panel_h),
-    panel_w = panel_w,
-    panel_h = panel_h
+    height = sapply(lay, function(l) margin_h + l[["nrow"]] * panel_h)
   )
 }
 
@@ -100,24 +97,18 @@ ggsave_langs <- function(p_by_lang, fname, ...){
 }
 
 
-# y-axis titles in low figures
-# A y-axis title longer than the height of the panel area overflows (e.g. the one-row,
-# syphilis-only coverage figures). wrap_axis_title() keeps the title as it is (including its
-# manual line breaks \n) if every line fits; otherwise it re-wraps it with stringr::str_wrap()
-# into lines of at most n_chars characters.
-wrap_axis_title <- function(lab, n_chars) {
-  lines <- trimws(strsplit(lab, "\n", fixed = TRUE)[[1]])
-  lines <- lines[lines != ""]
-  if (all(nchar(lines) <= n_chars)) return(lab)
-  stringr::str_wrap(paste(lines, collapse = " "), width = n_chars)
-}
-
-# approximate number of characters that fit on a line of length_cm
-# size_pt: font size of the y-axis title; default: as set in the current theme (theme_get())
-# char_width: average character width as a fraction of the font size (~0.5 for sans-serif fonts);
-#             increase it if titles still overflow, decrease it if they wrap too early
-n_chars_fit <- function(length_cm,
-                        size_pt = ggplot2::calc_element("axis.title.y", ggplot2::theme_get())$size,
-                        char_width = 0.5) {
-  floor(length_cm / (char_width * size_pt * 2.54 / 72))
+# y-axis title as a text box that wraps to the height of the panel area, so it doesn't
+# overflow in low (one-row) figures. Needs the ggtext package.
+# The title is read as markdown: write manual line breaks as <br> (e.g. gsub("\n", "<br>", ylab));
+# lines that are too long are wrapped further.
+# ...: passed on to ggtext::element_textbox_simple (e.g. colour = sc1)
+theme_ytitle_wrap <- function(...) {
+  theme(
+    axis.title.y = ggtext::element_textbox_simple(
+      orientation = "left-rotated",
+      halign = 0.5,
+      margin = margin(b = 5),  # space between title and tick labels
+      ...
+    )
+  )
 }
