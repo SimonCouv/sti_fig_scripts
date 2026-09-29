@@ -83,30 +83,15 @@ ggsave_figs <- function(p_list, fp, suffixes = c(all = '', noTP = '_noTP', TP = 
 
 
 # save the three versions of a figure, for every language in langs
-# prefix: name of the per-language objects without "_<lang>", e.g. "m" for m_nl, m_fr, m_en
-#         (each is a list as returned by fig_inout())
+# p_by_lang: list of fig_inout() results named by language, e.g. list(nl = , fr = , en = )
 # fname: file name of the full figure without "_<lang>.png", e.g. "figure_01_test_trend_BE";
 #        saved in dir_figs as <fname>_<lang>.png, <fname>_<lang>_noTP.png, <fname>_<lang>_TP.png
 # ...: passed on to ggsave_figs (width, height, type, ...)
-ggsave_langs <- function(prefix, fname, ..., envir = parent.frame()){
+ggsave_langs <- function(p_by_lang, fname, ...){
   
+  stopifnot(setequal(names(p_by_lang), langs))
   for (lang in langs){
     print(lang)
-    p_list <- get(paste0(prefix, '_', lang), envir = envir)
-    ggsave_figs(p_list, fp = fs::path(dir_figs, sprintf("%s_%s.png", fname, lang)), ...)
+    ggsave_figs(p_by_lang[[lang]], fp = fs::path(dir_figs, sprintf("%s_%s.png", fname, lang)), ...)
   }
-
-
-# y-axis title that wraps automatically to the height of the panel area, so it doesn't
-# overflow in low (single-row) figures. Existing line breaks (\n) in the title are ignored.
-# Needs the ggtext package. Add after sti_theme() and theme(...), e.g.  + theme_ytitle_wrap()
-# ...: passed on to ggtext::element_textbox_simple (e.g. colour = sc1)
-theme_ytitle_wrap <- function(...) {
-  theme(
-    axis.title.y = ggtext::element_textbox_simple(
-      orientation = "left-rotated",
-      halign = 0.5,
-      ...
-    )
-  )
 }

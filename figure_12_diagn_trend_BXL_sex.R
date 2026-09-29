@@ -59,24 +59,25 @@ fig_BXL <- function(dat, ylab, facet_labels, legend_labels) {
     sti_theme() +
     theme(
       axis.text.x = element_text( hjust = 1, vjust = 0.5 ,angle = 45)
-    ) +
-      theme_ytitle_wrap()
+    )
   return(m)
 }
 
 
 # decide which language for the graph 
-m_nl <- fig_inout(fig_BXL, Adj_Reg_BXL, y_nl, facet_labels_nl, legend_labels_nl)
-m_fr <- fig_inout(fig_BXL, Adj_Reg_BXL, y_fr, facet_labels_fr, legend_labels_fr)
-m_en <- fig_inout(fig_BXL, Adj_Reg_BXL, y_en, facet_labels_en, legend_labels_en)
+m <- list(
+  nl = fig_inout(fig_BXL, Adj_Reg_BXL, y_nl, facet_labels_nl, legend_labels_nl),
+  fr = fig_inout(fig_BXL, Adj_Reg_BXL, y_fr, facet_labels_fr, legend_labels_fr),
+  en = fig_inout(fig_BXL, Adj_Reg_BXL, y_en, facet_labels_en, legend_labels_en)
+)
 
 # plot 
-# m_nl
-# m_fr 
-# m_en
+# m$nl$all
+# m$fr$all
+# m$en$all
 
 
 
 # save
-ggsave_langs("m", "figure_12_diagn_trend_BXL_sex")
+ggsave_langs(m, "figure_12_diagn_trend_BXL_sex")
 

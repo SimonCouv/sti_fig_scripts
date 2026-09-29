@@ -48,20 +48,21 @@ fig <- function(dat, ylab, legend_labels) {
     sti_theme() +
     theme(
       axis.text.x = element_text( hjust = 1, vjust = 0.5)
-    ) +
-      theme_ytitle_wrap()
+    )
   return(m)
 }
 
 
 # decide which language for the graph 
-m_nl <- fig_inout(fig, AdjInc_fig, y_nl, legend_labels_nl)
-m_fr <- fig_inout(fig, AdjInc_fig, y_fr, legend_labels_fr)
-m_en <- fig_inout(fig, AdjInc_fig, y_en, legend_labels_en)
+m <- list(
+  nl = fig_inout(fig, AdjInc_fig, y_nl, legend_labels_nl),
+  fr = fig_inout(fig, AdjInc_fig, y_fr, legend_labels_fr),
+  en = fig_inout(fig, AdjInc_fig, y_en, legend_labels_en)
+)
 
 
 # save
-ggsave_langs("m", "figure_05_diagn_trend_BE")
+ggsave_langs(m, "figure_05_diagn_trend_BE")
 
 
 

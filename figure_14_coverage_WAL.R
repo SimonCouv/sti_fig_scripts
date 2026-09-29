@@ -99,28 +99,29 @@ fig <- function(dat, xlab, ylab, ylab2, facet_labels) {
       axis.title.y.right = element_text(color = sc2),
       axis.ticks.y.right = element_line(color = sc2),
       axis.text.y.right = element_text(color = sc2)
-    ) +
-      theme_ytitle_wrap(colour = sc1)
+    )
   return(m)
 }
 
 
 # decide which language for the graph 
-m_nl <- fig_inout(fig, Coverage_fig, xlab_nl, ylab_nl, ylab2_nl, facet_labels_nl)
-m_fr <- fig_inout(fig, Coverage_fig, xlab_fr, ylab_fr, ylab2_fr, facet_labels_fr)
-m_en <- fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en)
+m <- list(
+  nl = fig_inout(fig, Coverage_fig, xlab_nl, ylab_nl, ylab2_nl, facet_labels_nl),
+  fr = fig_inout(fig, Coverage_fig, xlab_fr, ylab_fr, ylab2_fr, facet_labels_fr),
+  en = fig_inout(fig, Coverage_fig, xlab_en, ylab_en, ylab2_en, facet_labels_en)
+)
 
 # #plot
-# m_nl
-# m_fr
-# m_en
+# m$nl$all
+# m$fr$all
+# m$en$all
 
 
 # save
 # sizes (cm) per version: panel size of the full figure (16 x 9 cm) kept constant
 dims <- facet_dims_inout(Coverage_fig, width = 16, height = 9)
 
-ggsave_langs("m", "figure_14_coverage_WAL",
+ggsave_langs(m, "figure_14_coverage_WAL",
              width = dims$width, height = dims$height)
 
 

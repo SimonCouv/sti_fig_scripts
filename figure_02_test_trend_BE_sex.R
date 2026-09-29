@@ -66,22 +66,23 @@ fig <- function(dat, ylab, facet_labels, legend_labels) {
     theme(
       axis.text.x = element_text( angle = 45, hjust = 1, vjust = 0.5), 
       legend.text = element_text( size =9)
-    ) +
-      theme_ytitle_wrap()
+    )
   return(m)
 }
 
 
 
 # decide which language for the graph 
-m_nl <- fig_inout(fig, Tests_fig, ylab_nl, facet_labels_nl, legend_labels_nl)
-m_fr <- fig_inout(fig, Tests_fig, ylab_fr, facet_labels_fr, legend_labels_fr)
-m_en <- fig_inout(fig, Tests_fig, ylab_en, facet_labels_en, legend_labels_en)
+m <- list(
+  nl = fig_inout(fig, Tests_fig, ylab_nl, facet_labels_nl, legend_labels_nl),
+  fr = fig_inout(fig, Tests_fig, ylab_fr, facet_labels_fr, legend_labels_fr),
+  en = fig_inout(fig, Tests_fig, ylab_en, facet_labels_en, legend_labels_en)
+)
 
 
 
 # save
-ggsave_langs("m", "figure_02_test_trend_sex")
+ggsave_langs(m, "figure_02_test_trend_sex")
 
 # 
 # 1# narrative ---------------------------------------------------------------
