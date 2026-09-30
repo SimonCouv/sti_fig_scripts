@@ -47,15 +47,21 @@ facet_layout_germ <- function(dat) {
 
 
 # figure sizes (cm) for the three versions of a figure faceted with facet_layout_germ(),
-# keeping the panel size of the full figure (width x height) constant.
+# keeping the panel size of the full figure (width x height) constant, but with a minimum height.
 # margin_w, margin_h: space (cm) taken by axis titles, axis labels and legend, i.e. not by panels
-facet_dims_inout <- function(dat, width, height, margin_w = 3, margin_h = 2) {
+# min_height_frac: minimum height of each version, as a fraction of the height of the full figure;
+#   in versions raised to this minimum the panels are higher than in the full figure
+# returns width and height per version, and panel_area_h(nrow): height (cm) of the panel area
+#   of a version with nrow rows of panels (e.g. for theme_ytitle_wrap())
+facet_dims_inout <- function(dat, width, height, margin_w = 3, margin_h = 2, min_height_frac = 0.5) {
   lay <- lapply(split_inout(dat), facet_layout_germ)
   panel_w <- (width  - margin_w) / lay$all[["ncol"]]
   panel_h <- (height - margin_h) / lay$all[["nrow"]]
+  panel_area_h <- function(nrow) max(nrow * panel_h, min_height_frac * height - margin_h)
   list(
     width  = sapply(lay, function(l) margin_w + l[["ncol"]] * panel_w),
-    height = sapply(lay, function(l) margin_h + l[["nrow"]] * panel_h)
+    height = sapply(lay, function(l) margin_h + panel_area_h(l[["nrow"]])),
+    panel_area_h = panel_area_h
   )
 }
 
@@ -97,15 +103,19 @@ ggsave_langs <- function(p_by_lang, fname, ...){
 }
 
 
-# y-axis title as a text box that wraps to the height of the panel area, so it doesn't
-# overflow in low (one-row) figures. Needs the ggtext package.
+# y-axis title as a text box that wraps to a given length, so it doesn't overflow in
+# low (one-row) figures. Needs the ggtext package.
+# length_cm: length of the text box along the y axis (cm), normally the height of the panel area.
+#   Must be a fixed length: with a relative length ggplot2 reserves space for the title before
+#   the length is known, so a title wrapped over more lines overlaps the tick labels.
 # The title is read as markdown: write manual line breaks as <br> (e.g. gsub("\n", "<br>", ylab));
 # lines that are too long are wrapped further.
 # ...: passed on to ggtext::element_textbox_simple (e.g. colour = sc1)
-theme_ytitle_wrap <- function(...) {
+theme_ytitle_wrap <- function(length_cm, ...) {
   theme(
     axis.title.y = ggtext::element_textbox_simple(
       orientation = "left-rotated",
+      width = grid::unit(length_cm, "cm"),
       halign = 0.5,
       margin = margin(b = 5),  # space between title and tick labels
       ...
