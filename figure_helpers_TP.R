@@ -95,3 +95,20 @@ ggsave_langs <- function(p_by_lang, fname, ...){
     ggsave_figs(p_by_lang[[lang]], fp = fs::path(dir_figs, sprintf("%s_%s.png", fname, lang)), ...)
   }
 }
+
+
+# y-axis title as a text box that wraps to the height of the panel area, so it doesn't
+# overflow in low (one-row) figures. Needs the ggtext package.
+# The title is read as markdown: write manual line breaks as <br> (e.g. gsub("\n", "<br>", ylab));
+# lines that are too long are wrapped further.
+# ...: passed on to ggtext::element_textbox_simple (e.g. colour = sc1)
+theme_ytitle_wrap <- function(...) {
+  theme(
+    axis.title.y = ggtext::element_textbox_simple(
+      orientation = "left-rotated",
+      halign = 0.5,
+      margin = margin(b = 5),  # space between title and tick labels
+      ...
+    )
+  )
+}

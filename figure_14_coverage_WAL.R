@@ -54,6 +54,8 @@ fig <- function(dat, xlab, ylab, ylab2, facet_labels) {
   
   # one column per germ, one row per sex; syphilis only: one row
   lay <- facet_layout_germ(dat)
+  # y-axis title is a text box (theme_ytitle_wrap): keep the manual line breaks
+  ylab <- gsub("\n", "<br>", ylab, fixed = TRUE)
   
   m <- dat %>%
     ggplot(aes(x = Year)) +
@@ -99,7 +101,8 @@ fig <- function(dat, xlab, ylab, ylab2, facet_labels) {
       axis.title.y.right = element_text(color = sc2),
       axis.ticks.y.right = element_line(color = sc2),
       axis.text.y.right = element_text(color = sc2)
-    )
+    ) +
+      theme_ytitle_wrap(colour = sc1)
   return(m)
 }
 
