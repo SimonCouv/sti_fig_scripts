@@ -47,17 +47,21 @@ facet_layout_germ <- function(dat) {
 
 
 # figure sizes (cm) for the three versions of a figure faceted with facet_layout_germ(),
-# keeping the panel size of the full figure (width x height) constant.
+# keeping the panel size of the full figure (width x height) constant, but with a minimum height.
 # margin_w, margin_h: space (cm) taken by axis titles, axis labels and legend, i.e. not by panels
-# returns width and height per version, and the height of one panel (panel_h)
-facet_dims_inout <- function(dat, width, height, margin_w = 3, margin_h = 2) {
+# min_height_frac: minimum height of each version, as a fraction of the height of the full figure;
+#   in versions raised to this minimum the panels are higher than in the full figure
+# returns width and height per version, and panel_area_h(nrow): height (cm) of the panel area
+#   of a version with nrow rows of panels (e.g. for theme_ytitle_wrap())
+facet_dims_inout <- function(dat, width, height, margin_w = 3, margin_h = 2, min_height_frac = 0.5) {
   lay <- lapply(split_inout(dat), facet_layout_germ)
   panel_w <- (width  - margin_w) / lay$all[["ncol"]]
   panel_h <- (height - margin_h) / lay$all[["nrow"]]
+  panel_area_h <- function(nrow) max(nrow * panel_h, min_height_frac * height - margin_h)
   list(
     width  = sapply(lay, function(l) margin_w + l[["ncol"]] * panel_w),
-    height = sapply(lay, function(l) margin_h + l[["nrow"]] * panel_h),
-    panel_h = panel_h
+    height = sapply(lay, function(l) margin_h + panel_area_h(l[["nrow"]])),
+    panel_area_h = panel_area_h
   )
 }
 

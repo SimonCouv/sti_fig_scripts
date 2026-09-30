@@ -37,7 +37,8 @@ Coverage_fig <- Coverage %>%
 
 scale_factor <- max(Coverage_fig$NTests_all, na.rm = TRUE ) / max(Coverage_fig$coverage , na.rm = TRUE )
 
-# sizes (cm) per version: panel size of the full figure (18 x 14 cm) kept constant
+# sizes (cm) per version: panel size of the full figure (18 x 14 cm) kept constant,
+# but each version at least half as high as the full figure
 dims <- facet_dims_inout(Coverage_fig, width = 18, height = 14)
 
 
@@ -94,7 +95,7 @@ m <- dat %>%
     axis.ticks.y.right = element_line(color = sc2),
     axis.text.y.right = element_text(color = sc2)
   ) +
-    theme_ytitle_wrap(length_cm = lay[["nrow"]] * dims$panel_h, colour = sc1)
+    theme_ytitle_wrap(length_cm = dims$panel_area_h(lay[["nrow"]]), colour = sc1)
 return(m)
 }
 
