@@ -66,6 +66,15 @@ facet_dims_inout <- function(dat, width, height, margin_w = 3, margin_h = 2, min
 }
 
 
+# figure widths (cm) for the three versions of a figure with the germs side by side on the x axis
+# (e.g. bar charts by germ): proportional to the number of germs shown, so the bars keep their size
+# margin_w: width (cm) not taken by the bars (y-axis title and labels, legend)
+germ_widths_inout <- function(dat, width = 16, margin_w = 3) {
+  n_germ <- sapply(split_inout(dat), function(d) dplyr::n_distinct(d$Germ))
+  margin_w + n_germ * (width - margin_w) / n_germ[["all"]]
+}
+
+
 # save the three versions of a figure
 # p_list: list(all = , noTP = , TP = ), as returned by fig_inout()
 # fp: file path of the full figure; the other versions get the suffix added before the extension

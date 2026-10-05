@@ -8,7 +8,7 @@ source("sti_theme_ggplot.R")
 #specify years (until when - test/diagnoses)
 source("prep_figure.R")
 
-# helpers for the versions with/without syphilis (dir_figs, langs, fig_inout, split_inout, ggsave_langs)
+# helpers for the versions with/without syphilis (dir_figs, langs, fig_inout, germ_widths_inout, ggsave_langs)
 # (sourced before setwd() below, from the same folder as prep_figure.R)
 source("figure_helpers_TP.R")
 
@@ -183,10 +183,7 @@ setwd("X:/COMMUN/IST/ANALYSES/2026")
 
 # save (in dir_figs, set in figure_helpers_TP.R)
 # widths (cm) per version: proportional to the number of germs shown, so the bars keep their size
-# margin_w: width (cm) not taken by the bars (y-axis title and labels, legend)
-margin_w <- 3
-n_germ <- sapply(split_inout(Tests_MD_Germ), function(d) dplyr::n_distinct(d$Germ))
-widths <- margin_w + n_germ * (16 - margin_w) / n_germ[["all"]]
+widths <- germ_widths_inout(Tests_MD_Germ, width = 16)
 
 ggsave_langs(m, "figure_00_test_prescriber",
              width = widths, height = 9)
