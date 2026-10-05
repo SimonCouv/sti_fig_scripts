@@ -8,7 +8,7 @@ source("sti_theme_ggplot.R")
 #specify years (until when - test/diagnoses)
 source("prep_figure.R")
 
-# helpers for the versions with/without syphilis (fig_inout, split_inout, ggsave_figs)
+# helpers for the versions with/without syphilis (dir_figs, langs, fig_inout, split_inout, ggsave_langs)
 # (sourced before setwd() below, from the same folder as prep_figure.R)
 source("figure_helpers_TP.R")
 
@@ -141,6 +141,17 @@ legend_labels_en <- c(ER = "Acute Medicine & ER", GP = "General Practitioners", 
 
 SSC_MD <- setNames(SSC[1:5], c("ER", "GP", "GYN", "INT", "Oth"))
 
+y_max <- 0.6
+
+#check if preset y-limits are ok
+max_pct <- max(Tests_MD_Germ$pct, na.rm = TRUE)
+if (max_pct > y_max) {
+  stop(sprintf(
+    "Maximum percentage (%.2f) exceeds upper limit of y-axis (%.2f). adjust y_max.",
+    max_pct, y_max
+  ))
+}
+
 
 fig <- function(dat, ylab, x_labels, legend_labels) {
 
@@ -148,7 +159,7 @@ m <- dat %>%
   ggplot(aes(x=Germ, y = pct, fill = MD_type))+
   geom_col(width = 0.8, position = position_dodge(width = 0.8)) +
   scale_x_discrete(labels= x_labels, expand = expansion(mult = c(0.15, 0.15))) +
-  scale_y_continuous(limits = c(0, 0.6), labels = percent_format(accuracy = 1)) +
+  scale_y_continuous(limits = c(0, y_max), labels = percent_format(accuracy = 1)) +
 
   scale_fill_manual(
     name = NULL,
@@ -160,23 +171,25 @@ m <- dat %>%
 return(m)
 }
 
-# three versions: all germs, without syphilis, syphilis only (Dutch only, as before)
-m <- fig_inout(fig, Tests_MD_Germ, y_nl, x_labels_nl, legend_labels_nl)
+# decide which language for the graph
+m <- list(
+  nl = fig_inout(fig, Tests_MD_Germ, y_nl, x_labels_nl, legend_labels_nl),
+  fr = fig_inout(fig, Tests_MD_Germ, y_fr, x_labels_fr, legend_labels_fr),
+  en = fig_inout(fig, Tests_MD_Germ, y_en, x_labels_en, legend_labels_en)
+)
 
-m$all
+m$nl$all
 setwd("X:/COMMUN/IST/ANALYSES/2026")
 
-# save
-foldr <- "X:/COMMUN/IST/ANALYSES/2026/results_figures_report/"
-
+# save (in dir_figs, set in figure_helpers_TP.R)
 # widths (cm) per version: proportional to the number of germs shown, so the bars keep their size
 # margin_w: width (cm) not taken by the bars (y-axis title and labels, legend)
 margin_w <- 3
 n_germ <- sapply(split_inout(Tests_MD_Germ), function(d) dplyr::n_distinct(d$Germ))
 widths <- margin_w + n_germ * (16 - margin_w) / n_germ[["all"]]
 
-ggsave_figs(m, fp = paste0(foldr,"figure_00_test_prescriber_nl.png"),
-            width = widths, height = 9)
+ggsave_langs(m, "figure_00_test_prescriber",
+             width = widths, height = 9)
 
 
 
