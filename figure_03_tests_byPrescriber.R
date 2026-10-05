@@ -8,6 +8,10 @@ source("sti_theme_ggplot.R")
 #specify years (until when - test/diagnoses)
 source("prep_figure.R")
 
+# helpers for the versions with/without syphilis (dir_figs, langs, fig_inout, split_inout, ggsave_langs)
+# (sourced before setwd() below, from the same folder as prep_figure.R)
+source("figure_helpers_TP.R")
+
 
 # leave the raw data from RIZIV within the R package, but perform analysis only within the ANALYSES folder
 #- as this output (per age group / region) is on its own
@@ -123,40 +127,69 @@ y_nl <- "Percentage tests per pathogeen"
 y_fr <- "Pourcentage de tests par pathogène"
 y_en <- "Percentage of tests per germ"
 
-x_labels_nl <- c("Chlamydia", "Gonorroe", "Syfilis")
-x_labels_fr <- c("Chlamydia", "Gonorrhée", "Syphilis")
-x_labels_en <- c("Chlamydia", "Gonorrhoea", "Syphilis")
+x_labels_nl <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorroe", TREPAL = "Syfilis")
+x_labels_fr <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhée", TREPAL = "Syphilis")
+x_labels_en <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhoea", TREPAL = "Syphilis")
 
-legend_labels_nl <- c("Acute Geneeskunde & Spoedgen.", "Huisartsen", "Gynaecol. & Verlosk.", "Internisten", "Andere")
-legend_labels_fr <- c( "Médecine aiguë & Urg.", "Médecins généralistes", "Gynécol. & Obst", "Médecins internistes",
-  "Autres")
-legend_labels_en <- c( "Acute Medicine & ER", "General Practitioners", "Gynecology & OB", "Internists",
-                           "Other" )
+# legend labels and colours named by prescriber type (MD_type), so they stay with the right
+# prescriber type if one has no tests in a version (e.g. syphilis only)
+legend_labels_nl <- c(ER = "Acute Geneeskunde & Spoedgen.", GP = "Huisartsen", GYN = "Gynaecol. & Verlosk.", INT = "Internisten", Oth = "Andere")
+legend_labels_fr <- c(ER = "Médecine aiguë & Urg.", GP = "Médecins généralistes", GYN = "Gynécol. & Obst", INT = "Médecins internistes",
+  Oth = "Autres")
+legend_labels_en <- c(ER = "Acute Medicine & ER", GP = "General Practitioners", GYN = "Gynecology & OB", INT = "Internists",
+                           Oth = "Other" )
+
+SSC_MD <- setNames(SSC[1:5], c("ER", "GP", "GYN", "INT", "Oth"))
+
+y_max <- 0.6
+
+#check if preset y-limits are ok
+max_pct <- max(Tests_MD_Germ$pct, na.rm = TRUE)
+if (max_pct > y_max) {
+  stop(sprintf(
+    "Maximum percentage (%.2f) exceeds upper limit of y-axis (%.2f). adjust y_max.",
+    max_pct, y_max
+  ))
+}
 
 
-m <-Tests_MD_Germ %>%
+fig <- function(dat, ylab, x_labels, legend_labels) {
+
+m <- dat %>%
   ggplot(aes(x=Germ, y = pct, fill = MD_type))+
   geom_col(width = 0.8, position = position_dodge(width = 0.8)) +
-  scale_x_discrete(labels= x_labels_nl, expand = expansion(mult = c(0.15, 0.15))) +
-  scale_y_continuous(limits = c(0, 0.6), labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels= x_labels, expand = expansion(mult = c(0.15, 0.15))) +
+  scale_y_continuous(limits = c(0, y_max), labels = percent_format(accuracy = 1)) +
 
   scale_fill_manual(
     name = NULL,
-    values = SSC, 
-    labels = legend_labels_nl
+    values = SSC_MD, 
+    labels = legend_labels
   )+
-  labs(x = "", y = y_nl)+ 
+  labs(x = "", y = ylab)+ 
   sti_theme()
-  
+return(m)
+}
 
-m
+# decide which language for the graph
+m <- list(
+  nl = fig_inout(fig, Tests_MD_Germ, y_nl, x_labels_nl, legend_labels_nl),
+  fr = fig_inout(fig, Tests_MD_Germ, y_fr, x_labels_fr, legend_labels_fr),
+  en = fig_inout(fig, Tests_MD_Germ, y_en, x_labels_en, legend_labels_en)
+)
+
+m$nl$all
 setwd("X:/COMMUN/IST/ANALYSES/2026")
 
-# save
-foldr <- "X:/COMMUN/IST/ANALYSES/2026/results_figures_report/"
-ggsave(m, filename = paste0(foldr,"figure_00_test_prescriber_nl.png"), 
-       dpi = 300, 
-       width = 16, height = 9, units = "cm")
+# save (in dir_figs, set in figure_helpers_TP.R)
+# widths (cm) per version: proportional to the number of germs shown, so the bars keep their size
+# margin_w: width (cm) not taken by the bars (y-axis title and labels, legend)
+margin_w <- 3
+n_germ <- sapply(split_inout(Tests_MD_Germ), function(d) dplyr::n_distinct(d$Germ))
+widths <- margin_w + n_germ * (16 - margin_w) / n_germ[["all"]]
+
+ggsave_langs(m, "figure_00_test_prescriber",
+             width = widths, height = 9)
 
 
 
