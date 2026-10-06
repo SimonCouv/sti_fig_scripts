@@ -72,7 +72,9 @@ m <- list(
 
 # save (in dir_figs, set in figure_helpers_TP.R)
 # widths (cm) per version: proportional to the number of germs shown, so the bars keep their size
-widths <- germ_widths_inout(Tests_MD_Germ, width = 16)
+# margin_w: width (cm) of the y-axis title and labels plus the legend, the same in every version;
+#   wide here because of the long legend labels
+widths <- germ_widths_inout(Tests_MD_Germ, width = 16, margin_w = 6.5)
 
 ggsave_langs(m, "figure_03_test_prescrib_uro_derm",
              width = widths, height = 9)
