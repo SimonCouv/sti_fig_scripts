@@ -18,25 +18,16 @@ x_labels_nl <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorroe", TREPAL = "Syfilis")
 x_labels_fr <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhée", TREPAL = "Syphilis")
 x_labels_en <- c(CHLTRA = "Chlamydia", NEIGON = "Gonorrhoea", TREPAL = "Syphilis")
 
-legend_labels_nl <- c("Dermatologen","Acute en Spoedartsen", "Huisartsen", "Gynaecologen & \n Verloskundigen", "Internisten", "Urologen", "Andere")
-legend_labels_fr <- c( "Dermatologues","Médecine aiguë & Urg.", "Médecins généralistes", "Gynécol. & Obst", "Médecins internistes", 
-                       "Urologues", "Autres")
-legend_labels_en <- c( "Dermatologists","Acute Medicine & ER", "General Practitioners", "Gynecology & OB", "Internists", 
-                        "Urologists", "Other")
+# legend labels and colours named by prescriber type (MD_type), so they stay with the right
+# prescriber type if one has no tests in a version (e.g. syphilis only)
+legend_labels_nl <- c(DERM = "Dermatologen", ER = "Acute en Spoedartsen", GP = "Huisartsen", GYN = "Gynaecologen & \n Verloskundigen",
+                      INT = "Internisten", URO = "Urologen", z_Oth = "Andere")
+legend_labels_fr <- c(DERM = "Dermatologues", ER = "Médecine aiguë & Urg.", GP = "Médecins généralistes", GYN = "Gynécol. & Obst",
+                      INT = "Médecins internistes", URO = "Urologues", z_Oth = "Autres")
+legend_labels_en <- c(DERM = "Dermatologists", ER = "Acute Medicine & ER", GP = "General Practitioners", GYN = "Gynecology & OB",
+                      INT = "Internists", URO = "Urologists", z_Oth = "Other")
 
-# legend labels and colours named by prescriber type (MD_type), in the order of the full figure
-# (as ggplot2 orders them), so they stay with the right prescriber type if one has no tests in a
-# version (e.g. syphilis only)
-md_types <- if (is.factor(Tests_MD_Germ$MD_type)) {
-  levels(droplevels(Tests_MD_Germ$MD_type))
-} else {
-  sort(unique(Tests_MD_Germ$MD_type))
-}
-stopifnot(length(md_types) == length(legend_labels_nl))
-names(legend_labels_nl) <- md_types
-names(legend_labels_fr) <- md_types
-names(legend_labels_en) <- md_types
-SSC_MD <- setNames(SSC[seq_along(md_types)], md_types)
+SSC_MD <- setNames(SSC[1:7], c("DERM", "ER", "GP", "GYN", "INT", "URO", "z_Oth"))
 
 y_max <- 0.6
 
