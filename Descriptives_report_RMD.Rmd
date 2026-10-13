@@ -1,0 +1,974 @@
+---
+title: "Descriptive tables STI report"
+author: "Amaryl"
+date: "2026-08-13"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidytable)
+library(scales)
+library(flextable)
+load("data_report_2026test_13okt2026.RData")
+
+
+#Specify until which year
+year_of_interest_test <- 2025
+year_of_interest_diagn <- 2025
+
+```
+
+## Fig 1 Reimbursed tests - Belgium
+```{r Fig Tests BE, echo=FALSE}
+FIG <- Coverage %>%
+  dplyr::filter( Gender == "All" & Region == "BEL" & Year <= year_of_interest_test)%>%
+  distinct()%>%
+  left_join(
+    BelgianPop_STI %>% 
+      dplyr::filter(Age == "All"),
+    by = c("Year", "Region", "Gender")
+  )%>%
+  mutate( test_pop = (NTests_all / Population) *1000)%>%
+  arrange(Germ, Region, Year) %>%
+    group_by(Germ, Region) %>%
+    mutate(
+      
+      # Year-over-year percentage difference
+      pct_diff_1_year = (test_pop - lag(test_pop)) / lag(test_pop),
+      
+      # Difference between year_of_interest_test and 2016 (only shown on year_of_interest_test row)
+      pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (test_pop - first(test_pop[Year == 2016])) /
+          first(test_pop[Year == 2016]),
+        NA_real_
+      ),
+      
+
+      # Average yearly percentage difference between 2016 and year of interest
+      # CAGR-style calculation
+      avg_yearly_pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (
+          (test_pop / first(test_pop[Year == 2016]))^(1 / (year_of_interest_test - 2016)) - 1
+        ),
+        NA_real_
+      )
+      
+    ) %>%
+    ungroup()%>%
+  select(-c(Gender, Region, NTests_epi, coverage, coverage_lag, coverage_trend, Age, Population))
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(.x, accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG)
+```
+
+
+## Fig 2 Reimbursed tests - Belgium by sex
+```{r Fig  Belgian tests by sex , echo=FALSE}
+
+FIG <- Coverage %>%
+  dplyr::filter( Gender != "All" & Region == "BEL" & Year <= year_of_interest_test)%>%
+  
+   left_join(
+    BelgianPop_STI %>% 
+      dplyr::filter(Age == "All"),
+    by = c("Year", "Region", "Gender")
+  )%>%
+  distinct()%>%
+  mutate( test_pop = (NTests_all / Population) *1000)%>%
+  
+  arrange(Germ, Gender, Year) %>%
+  group_by(Germ, Region, Age, Gender)%>%
+  mutate(
+    
+    # Year-over-year percentage difference
+  
+      pct_diff_1_year = (test_pop - lag(test_pop)) / lag(test_pop),
+      
+      # Difference between year of interest and 2016 (only shown on year of interest row)
+      pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (test_pop - first(test_pop[Year == 2016])) /
+          first(test_pop[Year == 2016]),
+        NA_real_
+      ),  
+      # Average yearly percentage difference between 2016 and year of interest
+      # CAGR-style calculation
+    avg_yearly_pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (
+          (test_pop / first(test_pop[Year == 2016]))^(1 / (year_of_interest_test - 2016)) - 1
+        ),
+        NA_real_
+      )
+      
+      
+    )%>%
+  select(-c(NTests_epi, coverage, coverage_lag, coverage_trend, Population))
+
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt)
+
+
+
+
+```
+
+
+<!-- ## Fig 3  Tests by prescriber -->
+
+<!-- ```{r Fig 3 : tests by prescriber, echo=FALSE} -->
+
+<!-- ``` -->
+
+## Fig 4 Coverage
+```{r Fig  : coverage,  echo=FALSE}
+Region_fig <- "BEL"
+pct_cols <- "coverage"
+
+FIG <- Coverage %>%
+  filter(Region == Region_fig)%>%
+  select(Germ, Gender, Region, Year, coverage)#%>%
+  #filter(Year %in% c(2016,year_of_interest_test))
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt, Region_fig)
+
+``` 
+
+## Fig 5 Diagnostic trends - Belgium
+```{r Fig  : Diagnostic trends - Belgium, echo=FALSE}
+FIG <-AdjInc %>%
+  filter(Gender == "All" & Region == "BEL" & Age == "All")%>%
+   arrange(Germ, Year) %>%
+  group_by(Germ, Region, Age)%>%
+  mutate(
+    # Year-over-year percentage difference
+  pct_diff_1_year = (Inc_est - lag(Inc_est)) / lag(Inc_est),
+  
+  # Difference between year_of_interest_diagn and 2016 (only shown on year_of_interest_diagn row)
+  pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (Inc_est - first(Inc_est[Year == 2016])) /
+      first(Inc_est[Year == 2016]),
+    NA_real_
+  ),
+  
+  # Average yearly percentage difference between 2016 and year_of_interest_diagn
+  # CAGR-style calculation
+  avg_yearly_pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (
+      (Inc_est / first(Inc_est[Year == 2016]))^(1 / (year_of_interest_diagn - 2016)) - 1
+    ),
+    NA_real_
+  )) %>%
+  ungroup()%>%
+  select(-c(NCases, coverage, NCases_corr, Population))
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+
+
+```
+
+## Fig 6 Diagnostic trends - Belgium by sex
+```{r Fig  : Diagnostic trends - Belgium by sex, echo=FALSE}
+FIG <-AdjInc %>%
+  filter(Gender != "All" & Region == "BEL" & Age == "All")%>%
+  
+  arrange(Germ, Gender, Year) %>%
+  group_by(Germ, Region, Age, Gender)%>%
+  mutate(
+    # Year-over-year percentage difference
+  pct_diff_1_year = (Inc_est - lag(Inc_est)) / lag(Inc_est),
+  
+  # Difference between year_of_interest_diagn and 2016 (only shown on year_of_interest_diagn row)
+  pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (Inc_est - first(Inc_est[Year == 2016])) /
+      first(Inc_est[Year == 2016]),
+    NA_real_
+  ),
+  
+  # Average yearly percentage difference between 2016 and year_of_interest_diagn
+  # CAGR-style calculation
+  avg_yearly_pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (
+      (Inc_est / first(Inc_est[Year == 2016]))^(1 / (year_of_interest_diagn - 2016)) - 1
+    ),
+    NA_real_
+  )) %>%
+  ungroup()%>%
+  select(-c(NCases, coverage, NCases_corr, Population))
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+
+```
+
+
+## Fig 7 Test trends - Flanders by sex
+
+```{r Fig : Test trends - Flanders by sex, echo=FALSE}
+FIG <- Coverage %>%
+  dplyr::filter( Gender != "All" & Region == "FL" & Year <= year_of_interest_test)%>%
+  distinct()%>%
+ left_join(
+    BelgianPop_STI %>% 
+      dplyr::filter(Age == "All"),
+    by = c("Year", "Region", "Gender")
+  )%>%
+  distinct()%>%
+  mutate( test_pop = (NTests_all / Population) *1000)%>%
+  
+  arrange(Germ, Gender, Year) %>%
+  group_by(Germ, Region, Age, Gender)%>%
+  mutate(
+    
+    # Year-over-year percentage difference
+  
+      pct_diff_1_year = (test_pop - lag(test_pop)) / lag(test_pop),
+      
+      # Difference between year of interest and 2016 (only shown on year of interest row)
+      pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (test_pop - first(test_pop[Year == 2016])) /
+          first(test_pop[Year == 2016]),
+        NA_real_
+      ),  
+      # Average yearly percentage difference between 2016 and year of interest
+      # CAGR-style calculation
+    avg_yearly_pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (
+          (test_pop / first(test_pop[Year == 2016]))^(1 / (year_of_interest_test - 2016)) - 1
+        ),
+        NA_real_
+      )
+      
+      
+    )%>%
+  select(-c(NTests_epi, coverage, coverage_lag, coverage_trend, Population))
+
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt)
+```
+
+## Fig 8 Coverage Flanders
+```{r Fig : coverage Flanders,  echo=FALSE}
+Region_fig <- "FL"
+pct_cols <- "coverage"
+
+FIG <- Coverage %>%
+  filter(Region == Region_fig)%>%
+  select(Germ, Gender, Region, Year, coverage)#%>%
+  #filter(Year %in% c(2016,year_of_interest_test))
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt, Region_fig)
+
+``` 
+## Fig 9 Diagnostic trends - Flanders by sex
+
+```{r Fig : Diagnostic trends - Flanders by sex, echo=FALSE}
+FIG <-AdjInc %>%
+  filter(Gender != "All" & Region == "FL" & Age == "All")%>%
+  
+  arrange(Germ, Gender, Year) %>%
+  group_by(Germ, Region, Age, Gender)%>%
+  mutate(
+    # Year-over-year percentage difference
+  pct_diff_1_year = (Inc_est - lag(Inc_est)) / lag(Inc_est),
+  
+  # Difference between year_of_interest_diagn and 2016 (only shown on year_of_interest_diagn row)
+  pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (Inc_est - first(Inc_est[Year == 2016])) /
+      first(Inc_est[Year == 2016]),
+    NA_real_
+  ),
+  
+  # Average yearly percentage difference between 2016 and year_of_interest_diagn
+  # CAGR-style calculation
+  avg_yearly_pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (
+      (Inc_est / first(Inc_est[Year == 2016]))^(1 / (year_of_interest_diagn - 2016)) - 1
+    ),
+    NA_real_
+  )) %>%
+  ungroup()%>%
+  select(-c(NCases, coverage, NCases_corr, Population))
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+
+```
+
+
+
+## Fig 10 Test trends - Brussels by sex
+
+```{r Fig : Test trends - Brussels by sex, echo=FALSE}
+FIG <- Coverage %>%
+  dplyr::filter( Gender != "All" & Region == "BXL" & Year <= year_of_interest_test)%>%
+  distinct()%>%
+ left_join(
+    BelgianPop_STI %>% 
+      dplyr::filter(Age == "All"),
+    by = c("Year", "Region", "Gender")
+  )%>%
+  distinct()%>%
+  mutate( test_pop = (NTests_all / Population) *1000)%>%
+  
+  arrange(Germ, Gender, Year) %>%
+  group_by(Germ, Region, Age, Gender)%>%
+  mutate(
+    
+    # Year-over-year percentage difference
+  
+      pct_diff_1_year = (test_pop - lag(test_pop)) / lag(test_pop),
+      
+      # Difference between year of interest and 2016 (only shown on year of interest row)
+      pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (test_pop - first(test_pop[Year == 2016])) /
+          first(test_pop[Year == 2016]),
+        NA_real_
+      ),  
+      # Average yearly percentage difference between 2016 and year of interest
+      # CAGR-style calculation
+    avg_yearly_pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (
+          (test_pop / first(test_pop[Year == 2016]))^(1 / (year_of_interest_test - 2016)) - 1
+        ),
+        NA_real_
+      )
+      
+      
+    )%>%
+  select(-c(NTests_epi, coverage, coverage_lag, coverage_trend, Population))
+
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt)
+```
+
+## Fig 11 Coverage Brussels
+```{r Fig : coverage Brussels,  echo=FALSE}
+Region_fig <- "BXL"
+pct_cols <- "coverage"
+
+FIG <- Coverage %>%
+  filter(Region == Region_fig)%>%
+  select(Germ, Gender, Region, Year, coverage)#%>%
+  #filter(Year %in% c(2016,year_of_interest_test))
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt, Region_fig)
+
+``` 
+
+## Fig 12 Diagnostic trends - Brussels by sex
+```{r Fig : Diagnostic trends - Brussels by sex, echo=FALSE}
+FIG <-AdjInc %>%
+  filter(Gender != "All" & Region == "BXL" & Age == "All")%>%
+  
+  arrange(Germ, Gender, Year) %>%
+  group_by(Germ, Region, Age, Gender)%>%
+  mutate(
+    # Year-over-year percentage difference
+  pct_diff_1_year = (Inc_est - lag(Inc_est)) / lag(Inc_est),
+  
+  # Difference between year_of_interest_diagn and 2016 (only shown on year_of_interest_diagn row)
+  pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (Inc_est - first(Inc_est[Year == 2016])) /
+      first(Inc_est[Year == 2016]),
+    NA_real_
+  ),
+  
+  # Average yearly percentage difference between 2016 and year_of_interest_diagn
+  # CAGR-style calculation
+  avg_yearly_pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (
+      (Inc_est / first(Inc_est[Year == 2016]))^(1 / (year_of_interest_diagn - 2016)) - 1
+    ),
+    NA_real_
+  )) %>%
+  ungroup()%>%
+  select(-c(NCases, coverage, NCases_corr, Population))
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+
+```
+
+
+## Fig 13 Test trends - Wallonia by sex
+
+```{r Fig : Test trends - Wallonia by sex, echo=FALSE}
+FIG <- Coverage %>%
+  dplyr::filter( Gender != "All" & Region == "WAL" & Year <= year_of_interest_test)%>%
+  distinct()%>%
+ left_join(
+    BelgianPop_STI %>% 
+      dplyr::filter(Age == "All"),
+    by = c("Year", "Region", "Gender")
+  )%>%
+  distinct()%>%
+  mutate( test_pop = (NTests_all / Population) *1000)%>%
+  
+  arrange(Germ, Gender, Year) %>%
+  group_by(Germ, Region, Age, Gender)%>%
+  mutate(
+    
+    # Year-over-year percentage difference
+  
+      pct_diff_1_year = (test_pop - lag(test_pop)) / lag(test_pop),
+      
+      # Difference between year of interest and 2016 (only shown on year of interest row)
+      pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (test_pop - first(test_pop[Year == 2016])) /
+          first(test_pop[Year == 2016]),
+        NA_real_
+      ),  
+      # Average yearly percentage difference between 2016 and year of interest
+      # CAGR-style calculation
+    avg_yearly_pct_diff_vs_2016 = if_else(
+        Year == year_of_interest_test,
+        (
+          (test_pop / first(test_pop[Year == 2016]))^(1 / (year_of_interest_test - 2016)) - 1
+        ),
+        NA_real_
+      )
+      
+      
+    )%>%
+  select(-c(NTests_epi, coverage, coverage_lag, coverage_trend, Population))
+
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt)
+```
+
+
+## Fig 14 Coverage Wallonia
+```{r Fig : coverage Wallonia,  echo=FALSE}
+Region_fig <- "WAL"
+pct_cols <- "coverage"
+
+FIG <- Coverage %>%
+  filter(Region == Region_fig)%>%
+  select(Germ, Gender, Region, Year, coverage)#%>%
+  #filter(Year %in% c(2016,year_of_interest_test))
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt, Region_fig)
+
+``` 
+
+## Fig 15 Diagnostic trends - Wallonia by sex
+```{r Fig : Diagnostic trends - Wallonia by sex, echo=FALSE}
+FIG <-AdjInc %>%
+  filter(Gender != "All" & Region == "WAL" & Age == "All")%>%
+  
+  arrange(Germ, Gender, Year) %>%
+  group_by(Germ, Region, Age, Gender)%>%
+  mutate(
+    # Year-over-year percentage difference
+  pct_diff_1_year = (Inc_est - lag(Inc_est)) / lag(Inc_est),
+  
+  # Difference between year_of_interest_diagn and 2016 (only shown on year_of_interest_diagn row)
+  pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (Inc_est - first(Inc_est[Year == 2016])) /
+      first(Inc_est[Year == 2016]),
+    NA_real_
+  ),
+  
+  # Average yearly percentage difference between 2016 and year_of_interest_diagn
+  # CAGR-style calculation
+  avg_yearly_pct_diff_vs_2016 = if_else(
+    Year == year_of_interest_diagn,
+    (
+      (Inc_est / first(Inc_est[Year == 2016]))^(1 / (year_of_interest_diagn - 2016)) - 1
+    ),
+    NA_real_
+  )) %>%
+  ungroup()%>%
+  select(-c(NCases, coverage, NCases_corr, Population))
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+```
+
+## Fig 16 Chlamydia Test trends - by sex & age
+```{r Fig Chlamydia test trends - by sex & age, echo=FALSE}
+FIG <- tests_pop_age %>%
+  filter(Germ == "CHLTRA" 
+          & Region == "BEL"
+          & Age_cat != "0-14")%>%
+
+  select(Germ, Gender, Age_cat, year_prest, Bel_tests_pop_1k)%>%
+  distinct()%>%
+  arrange(Gender, Age_cat, year_prest) %>%
+  group_by(Gender, Age_cat, Germ) %>%
+    mutate(
+      # Year-over-year percentage difference
+      pct_diff_1_year = (Bel_tests_pop_1k - lag(Bel_tests_pop_1k)) / lag(Bel_tests_pop_1k),
+      
+      # Difference between year_of_interest_test and 2016 (only shown on year_of_interest_test row)
+      pct_diff_vs_2016 = if_else(
+        year_prest == year_of_interest_test,
+        (Bel_tests_pop_1k - first(Bel_tests_pop_1k[year_prest == 2016])) /
+          first(Bel_tests_pop_1k[year_prest == 2016]),
+        NA_real_
+      ),
+      
+      # Average yearly percentage difference between 2016 and 2024
+      # CAGR-style calculation
+      avg_yearly_pct_diff_vs_2016 = if_else(
+        year_prest == year_of_interest_test,
+        (
+          (Bel_tests_pop_1k / first(Bel_tests_pop_1k[year_prest == 2016]))^(1 / (year_of_interest_test - 2016)) - 1
+        ),
+        NA_real_
+      )
+    ) %>%
+  ungroup()
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt)
+```
+
+
+## Fig 17 Chlamydia Diagnostic trends - Belgium by sex & age 
+``` {r Fig Chlamydia diagnostic trends - by sex & age, echo=FALSE}
+FIG <- AdjInc_new_age %>%
+  filter(Germ == "CHLTRA", Gender != "All" & Region == "BEL" & Age_cat_new != "All")%>%
+  filter(Age_cat_new != "0-14")%>%
+  distinct()%>%
+  arrange(Germ, Gender, Age_cat_new, Year) %>%
+  group_by(Germ, Gender, Age_cat_new)%>%
+  mutate(
+    
+    # Year-over-year percentage difference
+    pct_diff_1_year = (Inc_est_new - lag(Inc_est_new)) / lag(Inc_est_new),
+    
+    # Difference between year_of_interest_diagn and 2016 (only shown on year_of_interest_diagn row)
+    pct_diff_vs_2016 = if_else(
+      Year == year_of_interest_diagn,
+      (Inc_est_new - first(Inc_est_new[Year == 2016])) /
+        first(Inc_est_new[Year == 2016]),
+      NA_real_
+    ),
+    
+    # Average yearly percentage difference between 2016 and year_of_interest_diagn
+    # CAGR-style calculation
+    avg_yearly_pct_diff_vs_2016 = if_else(
+      Year == year_of_interest_diagn,
+      (
+        (Inc_est_new / first(Inc_est_new[Year == 2016]))^(1 / (year_of_interest_diagn - 2016)) - 1
+      ),
+      NA_real_
+    )) %>%
+  select(-c(NCases_new, Population_new, Cases_corr_new))
+#select(-c(NCases_new, Population_new, Cases_corr_new, coverage))
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+
+```
+
+## Fig 19 Gonorrhoea Test trends - by sex & age
+```{r Fig : Gonorrhoea test trends - by sex & age, echo=FALSE}
+FIG <- tests_pop_age %>%
+  filter(Germ == "NEIGON" 
+         & Region == "BEL"
+         & Age_cat != "0-14")%>%
+
+  select(Germ, Gender, Age_cat, year_prest, Bel_tests_pop_1k)%>%
+  distinct()%>%
+  arrange(Gender, Age_cat, year_prest) %>%
+  group_by(Gender, Age_cat, Germ) %>%
+    mutate(
+      # Year-over-year percentage difference
+      pct_diff_1_year = (Bel_tests_pop_1k - lag(Bel_tests_pop_1k)) / lag(Bel_tests_pop_1k),
+      
+      # Difference between year_of_interest_test and 2016 (only shown on year_of_interest_test row)
+      pct_diff_vs_2016 = if_else(
+        year_prest == year_of_interest_test,
+        (Bel_tests_pop_1k - first(Bel_tests_pop_1k[year_prest == 2016])) /
+          first(Bel_tests_pop_1k[year_prest == 2016]),
+        NA_real_
+      ),
+      
+      # Average yearly percentage difference between 2016 and year_of_interest_test
+      # CAGR-style calculation
+      avg_yearly_pct_diff_vs_2016 = if_else(
+        year_prest == year_of_interest_test,
+        (
+          (Bel_tests_pop_1k / first(Bel_tests_pop_1k[year_prest == 2016]))^(1 / (year_of_interest_test - 2016)) - 1
+        ),
+        NA_real_
+      )
+    ) %>%
+  ungroup()
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt)
+```
+
+## Fig 20 Gonorrhoea Diagnostic trends - Belgium by sex & age
+``` {r Fig Gonorrhoea diagnostic trends - by sex & age, echo = FALSE}
+FIG <- AdjInc_new_age %>%
+  filter(Germ == "NEIGON", Gender != "All" & Region == "BEL" & Age_cat_new != "All")%>%
+  filter(Age_cat_new != "0-14")%>%
+  distinct()%>%
+  arrange(Germ, Gender, Age_cat_new, Year) %>%
+  group_by(Germ, Gender, Age_cat_new)%>%
+  mutate(
+    
+    # Year-over-year percentage difference
+    pct_diff_1_year = (Inc_est_new - lag(Inc_est_new)) / lag(Inc_est_new),
+    
+    # Difference between year_of_interest_diagn and 2016 (only shown on year_of_interest_diagn row)
+    pct_diff_vs_2016 = if_else(
+      Year == year_of_interest_diagn,
+      (Inc_est_new - first(Inc_est_new[Year == 2016])) /
+        first(Inc_est_new[Year == 2016]),
+      NA_real_
+    ),
+    
+    # Average yearly percentage difference between 2016 and year_of_interest_diagn
+    # CAGR-style calculation
+    avg_yearly_pct_diff_vs_2016 = if_else(
+      Year == year_of_interest_diagn,
+      (
+        (Inc_est_new / first(Inc_est_new[Year == 2016]))^(1 / (year_of_interest_diagn - 2016)) - 1
+      ),
+      NA_real_
+    )) %>%
+  select(-c(NCases_new, Population_new, Cases_corr_new))
+#select(-c(NCases_new, Population_new, Cases_corr_new, coverage))
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+```
+
+## Fig 22 Syphilis Test trends - by sex & age
+```{r Fig : Syphilis test trends - by sex & age, echo=FALSE}
+FIG <- tests_pop_age %>%
+                filter(Germ == "TREPAL"
+                       & Region == "BEL"
+                       & Age_cat != "0-14")%>%
+
+  select(Germ, Gender, Age_cat, year_prest, Bel_tests_pop_1k)%>%
+  distinct()%>%
+  arrange(Gender, Age_cat, year_prest) %>%
+  group_by(Gender, Age_cat, Germ) %>%
+    mutate(
+      # Year-over-year percentage difference
+      pct_diff_1_year = (Bel_tests_pop_1k - lag(Bel_tests_pop_1k)) / lag(Bel_tests_pop_1k),
+      
+      # Difference between year_of_interest_test and 2016 (only shown on year_of_interest_test row)
+      pct_diff_vs_2016 = if_else(
+        year_prest == year_of_interest_test,
+        (Bel_tests_pop_1k - first(Bel_tests_pop_1k[year_prest == 2016])) /
+          first(Bel_tests_pop_1k[year_prest == 2016]),
+        NA_real_
+      ),
+      
+      # Average yearly percentage difference between 2016 and 2024
+      # CAGR-style calculation
+      avg_yearly_pct_diff_vs_2016 = if_else(
+        year_prest == year_of_interest_test,
+        (
+          (Bel_tests_pop_1k / first(Bel_tests_pop_1k[year_prest == 2016]))^(1 / (year_of_interest_test - 2016)) - 1
+        ),
+        NA_real_
+      )
+    ) %>%
+  ungroup()
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt)
+```
+## Fig 23 Syphilis Diagnostic trends - Belgium by sex & age
+``` {r Fig Syphilis diagnostic trends - by sex & age, echo = FALSE}
+FIG <- AdjInc_new_age %>%
+  filter(Germ == "TREPAL", Gender != "All" & Region == "BEL" & Age_cat_new != "All")%>%
+  filter(Age_cat_new != "0-14")%>%
+  distinct()%>%
+  arrange(Germ, Gender, Age_cat_new, Year) %>%
+  group_by(Germ, Gender, Age_cat_new)%>%
+  mutate(
+    
+    # Year-over-year percentage difference
+    pct_diff_1_year = (Inc_est_new - lag(Inc_est_new)) / lag(Inc_est_new),
+    
+    # Difference between year_of_interest_diagn and 2016 (only shown on year_of_interest_diagn row)
+    pct_diff_vs_2016 = if_else(
+      Year == year_of_interest_diagn,
+      (Inc_est_new - first(Inc_est_new[Year == 2016])) /
+        first(Inc_est_new[Year == 2016]),
+      NA_real_
+    ),
+    
+    # Average yearly percentage difference between 2016 and year_of_interest_diagn
+    # CAGR-style calculation
+    avg_yearly_pct_diff_vs_2016 = if_else(
+      Year == year_of_interest_diagn,
+      (
+        (Inc_est_new / first(Inc_est_new[Year == 2016]))^(1 / (year_of_interest_diagn - 2016)) - 1
+      ),
+      NA_real_
+    )) %>%
+  select(-c(NCases_new, Population_new, Cases_corr_new))
+#select(-c(NCases_new, Population_new, Cases_corr_new, coverage))
+
+pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+```
