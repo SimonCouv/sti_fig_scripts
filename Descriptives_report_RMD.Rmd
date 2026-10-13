@@ -142,11 +142,30 @@ rm(FIG, pct_cols, Tests_fig_fmt)
 ```
 
 
-<!-- ## Fig 3  Tests by prescriber -->
+## Fig 3 Tests by prescriber (incl. urologists & dermatologists)
+```{r Fig 3 tests by prescriber, echo=FALSE}
+# share of the reimbursed tests per germ by prescriber type (data for the year of the export only)
+FIG <- Tests_MD_Germ %>%
+  ungroup() %>%
+  select(Year, Germ, MD_type, tot_MD, tot_germ, pct) %>%
+  distinct() %>%
+  arrange(Germ, -pct)
 
-<!-- ```{r Fig 3 : tests by prescriber, echo=FALSE} -->
+pct_cols <- "pct"
 
-<!-- ``` -->
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, pct_cols, Tests_fig_fmt)
+```
 
 ## Fig 4 Coverage
 ```{r Fig  : coverage,  echo=FALSE}
@@ -774,6 +793,38 @@ rm(FIG, Tests_fig_fmt, pct_cols)
 
 ```
 
+## Fig 18 Chlamydia Diagnoses - Belgium by sex & age (`r year_of_interest_diagn`)
+``` {r Fig 18 Chlamydia diagnoses by sex & age, echo = FALSE}
+# estimated incidence by sex and age group for the year of interest only;
+# pct_cases_sex: share of the (coverage-corrected) cases of each sex in each age group,
+#   among the age groups shown (0-14 excluded, as in the trend tables)
+FIG <- AdjInc_new_age %>%
+  filter(Germ == "CHLTRA", Gender != "All" & Region == "BEL" & Age_cat_new != "All")%>%
+  filter(Age_cat_new != "0-14")%>%
+  filter(Year == year_of_interest_diagn)%>%
+  distinct()%>%
+  group_by(Germ, Gender)%>%
+  mutate(pct_cases_sex = Cases_corr_new / sum(Cases_corr_new, na.rm = TRUE))%>%
+  ungroup()%>%
+  arrange(Germ, Gender, Age_cat_new)%>%
+  select(Germ, Gender, Year, Age_cat_new, NCases_new, Cases_corr_new, Inc_est_new, pct_cases_sex)
+
+pct_cols <- "pct_cases_sex"
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+```
+
 ## Fig 19 Gonorrhoea Test trends - by sex & age
 ```{r Fig : Gonorrhoea test trends - by sex & age, echo=FALSE}
 FIG <- tests_pop_age %>%
@@ -874,6 +925,38 @@ flextable(Tests_fig_fmt)
 rm(FIG, Tests_fig_fmt, pct_cols)
 ```
 
+## Fig 21 Gonorrhoea Diagnoses - Belgium by sex & age (`r year_of_interest_diagn`)
+``` {r Fig 21 Gonorrhoea diagnoses by sex & age, echo = FALSE}
+# estimated incidence by sex and age group for the year of interest only;
+# pct_cases_sex: share of the (coverage-corrected) cases of each sex in each age group,
+#   among the age groups shown (0-14 excluded, as in the trend tables)
+FIG <- AdjInc_new_age %>%
+  filter(Germ == "NEIGON", Gender != "All" & Region == "BEL" & Age_cat_new != "All")%>%
+  filter(Age_cat_new != "0-14")%>%
+  filter(Year == year_of_interest_diagn)%>%
+  distinct()%>%
+  group_by(Germ, Gender)%>%
+  mutate(pct_cases_sex = Cases_corr_new / sum(Cases_corr_new, na.rm = TRUE))%>%
+  ungroup()%>%
+  arrange(Germ, Gender, Age_cat_new)%>%
+  select(Germ, Gender, Year, Age_cat_new, NCases_new, Cases_corr_new, Inc_est_new, pct_cases_sex)
+
+pct_cols <- "pct_cases_sex"
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+```
+
 ## Fig 22 Syphilis Test trends - by sex & age
 ```{r Fig : Syphilis test trends - by sex & age, echo=FALSE}
 FIG <- tests_pop_age %>%
@@ -958,6 +1041,38 @@ FIG <- AdjInc_new_age %>%
 #select(-c(NCases_new, Population_new, Cases_corr_new, coverage))
 
 pct_cols <- c("pct_diff_1_year", "pct_diff_vs_2016", "avg_yearly_pct_diff_vs_2016")
+
+Tests_fig_fmt <- FIG %>%
+  ungroup() %>%
+  dplyr::as_tibble() %>%
+  mutate(
+    across(
+      all_of(pct_cols),
+      ~ percent(as.numeric(.x), accuracy = 0.1)
+    )
+  )
+
+flextable(Tests_fig_fmt)
+rm(FIG, Tests_fig_fmt, pct_cols)
+```
+
+## Fig 24 Syphilis Diagnoses - Belgium by sex & age (`r year_of_interest_diagn`)
+``` {r Fig 24 Syphilis diagnoses by sex & age, echo = FALSE}
+# estimated incidence by sex and age group for the year of interest only;
+# pct_cases_sex: share of the (coverage-corrected) cases of each sex in each age group,
+#   among the age groups shown (0-14 excluded, as in the trend tables)
+FIG <- AdjInc_new_age %>%
+  filter(Germ == "TREPAL", Gender != "All" & Region == "BEL" & Age_cat_new != "All")%>%
+  filter(Age_cat_new != "0-14")%>%
+  filter(Year == year_of_interest_diagn)%>%
+  distinct()%>%
+  group_by(Germ, Gender)%>%
+  mutate(pct_cases_sex = Cases_corr_new / sum(Cases_corr_new, na.rm = TRUE))%>%
+  ungroup()%>%
+  arrange(Germ, Gender, Age_cat_new)%>%
+  select(Germ, Gender, Year, Age_cat_new, NCases_new, Cases_corr_new, Inc_est_new, pct_cases_sex)
+
+pct_cols <- "pct_cases_sex"
 
 Tests_fig_fmt <- FIG %>%
   ungroup() %>%
